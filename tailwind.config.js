@@ -223,7 +223,7 @@ module.exports = {
         "light-5": "#0000000a",
         "light-6": "#b8b8dc99",
         "light-7": "#f4f4f5",
-        "gray-1": "#697C89",
+        "gray-2": "#697C89",
         "glassmorphism": "rgba(16, 16, 18, 0.60)",
       },
       borderRadius: {
