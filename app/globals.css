@@ -5,7 +5,7 @@
 @layer components {
   /* Head Text */
   .head-text {
-    @apply text-heading2-bold text-light-1;
+    @apply text-heading2-bold  text-dark-1 dark:text-light-1;
   }
   .text-muted-foreground {
     color: hsl(var(--muted-foreground));

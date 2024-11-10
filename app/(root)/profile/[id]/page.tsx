@@ -30,9 +30,13 @@ async function Page({ params }: { params: { id: string } }) {
 
       <div className="mt-9">
         <Tabs defaultValue="threads" className="w-full">
-          <TabsList className="flex justify-evenly min-h-[50px] flex-1 items-center gap-3 dark:bg-dark-4 bg-light-7 text-light-2 dark:data-[state=active]:bg-[#0e0e12] data-[state=active]:bg-light-1 data-[state=active]:text-light-2 shadow-md">
+          <TabsList className="flex justify-evenly min-h-[50px] flex-1 items-center gap-3 dark:bg-dark-4 bg-light-1 text-primary dark:text-light-2 dark:data-[state=active]:bg-[#0e0e12] data-[state=active]:shadow-none shadow-md">
             {profileTabs.map((tab) => (
-              <TabsTrigger key={tab.label} value={tab.value} className="tab">
+              <TabsTrigger
+                key={tab.label}
+                value={tab.value}
+                className="rounded-none focus:bg-none hover:bg-none dark:text-light-2 ml-1 data-[state=active]:border-b-2 data-[state=active]:border-b-black "
+              >
                 <Image
                   src={tab.icon}
                   alt={tab.label}
@@ -40,7 +44,7 @@ async function Page({ params }: { params: { id: string } }) {
                   height={23}
                   className="object-contain"
                 />
-                <p className="max-sm:hidden text-base text-primary dark:text-light-2 ml-1">
+                <p className="max-sm:hidden text-base text-primary ">
                   {tab.label}
                 </p>
 

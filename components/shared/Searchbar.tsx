@@ -10,7 +10,7 @@ interface Props {
   routeType: string;
 }
 
-function Searchbar({ routeType }: Props) {
+function Searchbar({ routeType }: Readonly<Props>) {
   const router = useRouter();
   const [search, setSearch] = useState("");
 
@@ -28,7 +28,7 @@ function Searchbar({ routeType }: Props) {
   }, [search, routeType]);
 
   return (
-    <div className="flex gap-1 rounded-lg px-4 py-2 dark:bg-dark-3 bg-light-2">
+    <div className="flex gap-1 rounded-lg border bg-light-2 px-4 py-2 shadow-md dark:bg-dark-3">
       <Image
         src="/assets/search-gray.svg"
         alt="search"
@@ -43,7 +43,7 @@ function Searchbar({ routeType }: Props) {
         placeholder={`${
           routeType !== "/search" ? "Search communities" : "Search creators"
         }`}
-        className="no-focus border-none text-base-regular outline-none dark:bg-dark-3 dark:text-light-4 bg-light-2"
+        className="no-focus border-none bg-light-2 text-base-regular outline-none dark:bg-dark-3 dark:text-light-4"
       />
     </div>
   );

@@ -4,6 +4,7 @@ function getCurrentTheme() {
   }
   return 'light';
 }
+
 export const theme = getCurrentTheme();
 
 export const sidebarLinks = [
