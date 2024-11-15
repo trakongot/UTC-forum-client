@@ -18,7 +18,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "scontent.fhan17-1.fna.fbcdn.net",
+        hostname: "res.cloudinary.com",
       },
       {
         protocol: "https",
@@ -27,6 +27,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "uploadthing.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.yudiz.com",
       },
       {
         protocol: "https",

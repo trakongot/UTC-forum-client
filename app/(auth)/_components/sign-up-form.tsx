@@ -16,6 +16,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
 import { cn } from "@/lib/utils";
+import { useMutation } from "react-query";
+import { signupUser } from "@/apis/auth";
+import useUserStore from "@/store/useUserStore";
+import { useRouter } from "next/navigation";
+import { User } from "@/types/userType";
 
 interface SignUpFormProps extends HTMLAttributes<HTMLDivElement> {}
 
@@ -30,8 +35,12 @@ const formSchema = z
       .min(1, {
         message: "Please enter your password",
       })
-      .min(7, {
-        message: "Password must be at least 7 characters long",
+      .min(6, {
+        message: "Password must be at least 6 characters long",
+      })
+      .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])/, {
+        message:
+          "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character.",
       }),
     confirmPassword: z.string(),
   })
@@ -41,8 +50,24 @@ const formSchema = z
   });
 
 export function SignUpForm({ className, ...props }: SignUpFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
-
+  const router = useRouter();
+  const setUser = useUserStore((state) => state.setUser);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // api react query
+  const { isLoading, mutate: mutateSignUp } = useMutation(signupUser, {
+    onSuccess: (data: User) => {
+      // console.log(data);
+      setUser(data);
+      if (!data.onboarded) router.push("./onboarding");
+    },
+    onError: (error: any) => {
+      console.error("Login error:", error);
+      const errMessage =
+        error?.response?.data?.error || "Server error, please try again later";
+      setErrorMessage(errMessage);
+    },
+  });
+  // end api react query
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,12 +78,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
   });
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    console.log(data);
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
+    mutateSignUp({ ...data });
   }
 
   return (
@@ -105,6 +125,12 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
                 </FormItem>
               )}
             />
+            {/* Error handling */}
+            {errorMessage && (
+              <p className="text-sm font-medium text-red-500 dark:text-red-900">
+                {errorMessage ?? "An error occurred, please try again."}
+              </p>
+            )}
             <Button className="mt-2" loading={isLoading}>
               Create Account
             </Button>
@@ -113,7 +139,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
+              <div className="text-xs relative flex justify-center uppercase">
                 <span className="bg-background px-2 text-muted-foreground">
                   Or continue with
                 </span>
@@ -126,7 +152,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
                 className="w-full"
                 type="button"
                 loading={isLoading}
-                leftSection={<IconBrandGithub className="h-4 w-4" />}
+                leftSection={<IconBrandGithub className="size-4" />}
               >
                 GitHub
               </Button>
@@ -135,7 +161,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
                 className="w-full"
                 type="button"
                 loading={isLoading}
-                leftSection={<IconBrandFacebook className="h-4 w-4" />}
+                leftSection={<IconBrandFacebook className="size-4" />}
               >
                 Facebook
               </Button>

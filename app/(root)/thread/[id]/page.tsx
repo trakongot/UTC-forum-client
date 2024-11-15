@@ -1,66 +1,76 @@
-import { redirect } from "next/navigation";
-import { currentUser } from "@clerk/nextjs";
-
-import Comment from "@/components/forms/Comment";
+"use client";
+import { v4 as uuidv4 } from "uuid";
+import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
+import { useRouter } from "next/navigation";
+import useUserStore from "@/store/useUserStore";
+import ThreadCardSekeleton from "@/components/cards/ThreadCardSekeleton";
+import { getRepliesThread, getThreadById } from "@/apis/threads";
 import ThreadCard from "@/components/cards/ThreadCard";
 
-import { fetchUser } from "@/lib/actions/user.actions";
-import { fetchThreadById } from "@/lib/actions/thread.actions";
+export default function Page({ params }: { params: { id: string } }) {
+  const router = useRouter();
+  const currentUser = useUserStore((state) => state.user);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const threadId = params.id;
 
-export const revalidate = 0;
+  useEffect(() => {
+    if (currentUser?.onboarded === false) {
+      router.push("/onboarding");
+    }
+  }, [currentUser, router]);
 
-async function page({ params }: { params: { id: string } }) {
-  if (!params.id) return null;
+  const { data: threadData, isLoading: isLoadingThreadData } = useQuery({
+    queryKey: ["thread", threadId],
+    queryFn: () => getThreadById({ id: threadId }),
+    onError: (error) => {
+      console.error("Error fetching thread data:", error);
+    },
+    enabled: !!threadId,
+  });
 
-  const user = await currentUser();
-  if (!user) return null;
+  const { data: commentsData, isLoading: isLoadingCommentsData } = useQuery({
+    queryKey: ["comments", threadId, currentPage],
+    queryFn: () =>
+      getRepliesThread({ id: threadId, pageNumber: currentPage, pageSize }),
+    keepPreviousData: true,
+    onError: (error) => {
+      console.error("Error fetching comments data:", error);
+    },
+    enabled: !!threadId,
+  });
+  // console.log(threadData);
+  // console.log(commentsData);
+  if (!threadData || !commentsData) {
+    return <p className="no-result">Loading...</p>;
+  }
 
-  const userInfo = await fetchUser(user.id);
-  if (!userInfo?.onboarded) redirect("/onboarding");
-
-  const thread = await fetchThreadById(params.id);
+  if (!threadData) {
+    return <p className="no-result">No threads found</p>;
+  }
 
   return (
-    <section className='relative'>
-      <div>
-        <ThreadCard
-          id={thread._id}
-          currentUserId={user.id}
-          parentId={thread.parentId}
-          content={thread.text}
-          author={thread.author}
-          community={thread.community}
-          createdAt={thread.createdAt}
-          comments={thread.children}
-        />
-      </div>
+    <section className="relative">
+      {isLoadingThreadData ? (
+        <ThreadCardSekeleton />
+      ) : (
+        <ThreadCard key={threadData._id} data={threadData} />
+      )}
 
-      <div className='mt-7'>
-        <Comment
-          threadId={params.id}
-          currentUserImg={user.imageUrl}
-          currentUserId={JSON.stringify(userInfo._id)}
-        />
-      </div>
-
-      <div className='mt-10'>
-        {thread.children.map((childItem: any) => (
-          <ThreadCard
-            key={childItem._id}
-            id={childItem._id}
-            currentUserId={user.id}
-            parentId={childItem.parentId}
-            content={childItem.text}
-            author={childItem.author}
-            community={childItem.community}
-            createdAt={childItem.createdAt}
-            comments={childItem.children}
-            isComment
-          />
-        ))}
+      <div className="mt-10">
+        {isLoadingCommentsData ? (
+          Array(5)
+            .fill(0)
+            .map(() => <ThreadCardSekeleton key={uuidv4()} />)
+        ) : commentsData?.threads?.length === 0 ? (
+          <p className="no-result">No comments found</p>
+        ) : (
+          commentsData?.threads?.map((comment) => (
+            <ThreadCard key={comment._id} data={comment} />
+          ))
+        )}
       </div>
     </section>
   );
 }
-
-export default page;

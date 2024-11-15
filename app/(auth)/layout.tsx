@@ -1,7 +1,7 @@
 import React from "react";
 
 import "../globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
+import ReactQueryProvider from "@/lib/provider/reactQuery";
 
 export default function RootLayout({
   children,
@@ -9,10 +9,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ReactQueryProvider>
       <html lang="en">
         <body className="bg-light-2 dark:bg-dark-2">{children}</body>
       </html>
-    </ClerkProvider>
+    </ReactQueryProvider>
   );
 }

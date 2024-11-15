@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 
 export default function ForgotPassword() {
   return (
-    <div className="h-svh bg-primary-foreground container grid flex-col items-center justify-center lg:max-w-none lg:px-0">
+    <div className="container grid h-svh flex-col items-center justify-center bg-primary-foreground lg:max-w-none lg:px-0">
       <div className="mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[480px] lg:p-8">
         <div className="mb-4 flex items-center justify-center">
           <svg
@@ -15,7 +15,7 @@ export default function ForgotPassword() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="mr-2 h-6 w-6"
+            className="mr-2 size-6"
           >
             <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
           </svg>
@@ -31,7 +31,7 @@ export default function ForgotPassword() {
           </div>
           <ForgotForm />
 
-          <p className="mt-4 px-8 text-center text-sm text-muted-foreground">
+          <p className="text-sm mt-4 px-8 text-center text-muted-foreground">
             Don&apos;t have an account?
             <Link
               href={"/sign-up"}
