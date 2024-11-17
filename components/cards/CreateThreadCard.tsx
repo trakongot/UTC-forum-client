@@ -7,10 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import useTriggerStore from "@/store/useTriggerStore";
-import { Thread } from "@/types/threadType";
 import { useMutation } from "react-query";
 import { ToastAction } from "../ui/toast";
 import { toast } from "../ui/use-toast";
@@ -65,7 +62,7 @@ function CreateThreadForm({ className }: React.ComponentProps<"form">) {
   const { toggleTrigger } = useTriggerStore();
 
   // API mutation setup with React Query
-  const { isLoading, mutate } = useMutation<Thread, Error, { text: string }>({
+  const { isLoading, mutate } = useMutation({
     mutationFn: createThread,
     onSuccess: () => {
       toggleTrigger("isCreateThreadCardOpened");

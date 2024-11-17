@@ -1,7 +1,16 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { Flag, LinkIcon, Slack as Logo, LogOut, Save, Settings, UserMinus, VolumeX } from "lucide-react";
+import {
+  Flag,
+  LinkIcon,
+  Slack as Logo,
+  LogOut,
+  Save,
+  Settings,
+  UserMinus,
+  VolumeX,
+} from "lucide-react";
 import useTriggerStore from "@/store/useTriggerStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import useUserStore from "@/store/useUserStore";

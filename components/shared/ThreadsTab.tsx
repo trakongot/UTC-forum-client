@@ -1,6 +1,8 @@
-
-
-export default function ThreadsTab({ currentUserId, accountId, accountType }: Props) {
+export default function ThreadsTab({
+  currentUserId,
+  accountId,
+  accountType,
+}: Props) {
   return (
     <section className="mt-9 flex flex-col gap-10">
       {/* {result.threads.map((thread) => (
@@ -31,4 +33,3 @@ export default function ThreadsTab({ currentUserId, accountId, accountType }: Pr
     </section>
   );
 }
-
