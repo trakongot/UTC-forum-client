@@ -6,7 +6,6 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  
   return (
     <main className="mx-auto mt-20 flex max-w-3xl flex-col justify-start rounded-[24px] bg-light-1 px-10 py-20 shadow-form">
       <h1 className="head-text text-dark-1">Onboarding</h1>

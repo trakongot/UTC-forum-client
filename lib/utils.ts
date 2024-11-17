@@ -45,7 +45,7 @@ export const copyLink = (url: string) => {
   navigator.clipboard
     .writeText(url)
     .then(() => {
-      alert("Link copied to clipboard!"); 
+      alert("Link copied to clipboard!");
     })
     .catch((error) => {
       alert("Failed to copy link: " + error);
