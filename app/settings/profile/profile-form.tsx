@@ -1,6 +1,6 @@
 "use client";
 import { z } from "zod";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/custom/button";
 import {
   Form,
@@ -12,18 +12,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/use-toast";
-import { cn } from "@/lib/utils";
+// import { toast } from "@/components/ui/use-toast";
+// import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
+// import Link from "next/link";
+import useUserStore from "@/store/useUserStore";
+import Image from "next/image";
+import { ChangeEvent, useState } from "react";
 
 const profileFormSchema = z.object({
   username: z
@@ -34,64 +37,117 @@ const profileFormSchema = z.object({
     .max(30, {
       message: "Username must not be longer than 30 characters.",
     }),
-  email: z
+  name: z
     .string({
       required_error: "Please select an email to display.",
     })
-    .email(),
+    .min(2, {
+      message: "Username must be at least 2 characters.",
+    })
+    .max(10, {
+      message: "Username must not be longer than 30 characters.",
+    }),
+
   bio: z.string().max(160).min(4),
-  urls: z
-    .array(
-      z.object({
-        value: z.string().url({ message: "Please enter a valid URL." }),
-      })
-    )
-    .optional(),
+  // urls: z
+  //   .array(
+  //     z.object({
+  //       value: z.string().url({ message: "Please enter a valid URL." }),
+  //     })
+  //   )
+  //   .optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 // This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {
-  bio: "I own a computer.",
-  urls: [
-    { value: "https://shadcn.com" },
-    { value: "http://twitter.com/shadcn" },
-  ],
-};
 
 export default function ProfileForm() {
+  const { user } = useUserStore();
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // URL tạm thời cho ảnh
+  const [file, setFile] = useState<File | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const defaultValues: Partial<ProfileFormValues> = {
+    bio: user?.bio ?? "",
+    username: user?.username ?? "",
+    name: user?.name ?? "",
+    // urls: [
+    //   { value: "https://shadcn.com" },
+    //   { value: "http://twitter.com/shadcn" },
+    // ],
+  };
+  // const { fields, append } = useFieldArray({
+  //   name: "urls",
+  //   control: form.control,
+  // });
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
     mode: "onChange",
   });
-
-  const { fields, append } = useFieldArray({
-    name: "urls",
-    control: form.control,
-  });
-
   function onSubmit(data: ProfileFormValues) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    if (!file) {
+      setErrorMessage("Please upload a profile photo.");
+      return;
+    }
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      setErrorMessage("Please upload a valid image (PNG, JPEG).");
+      return;
+    }
+    console.log(data);
   }
+  const handleImage = (e: ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const selectedFile = e.target.files ? e.target.files[0] : null;
+    if (selectedFile?.type.includes("image")) {
+      setFile(selectedFile);
+      const objectUrl = URL.createObjectURL(selectedFile);
+      setImagePreview(objectUrl); // Tạo URL tạm thời để hiển thị ảnh
+    } else {
+      setErrorMessage("Please select a valid image file.");
+    }
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormItem className="flex items-center gap-4">
+          <FormLabel>
+            {imagePreview ? (
+              <Image
+                src={imagePreview}
+                alt="profile_icon"
+                priority
+                width={96}
+                height={96}
+                className="rounded-full"
+              />
+            ) : (
+              <Image
+                src="/assets/profile.svg"
+                alt="profile_icon"
+                width={24}
+                height={24}
+                className="rounded-full object-contain"
+              />
+            )}
+          </FormLabel>
+          <FormControl className="flex-1 font-semibold">
+            <Input
+              type="file"
+              accept="image/*"
+              placeholder="Add profile photo"
+              onChange={handleImage}
+            />
+          </FormControl>
+        </FormItem>
         <FormField
           control={form.control}
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>username</FormLabel>
               <FormControl>
                 <Input placeholder="shadcn" {...field} />
               </FormControl>
@@ -103,7 +159,7 @@ export default function ProfileForm() {
             </FormItem>
           )}
         />
-        <FormField
+        {/* <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
@@ -128,7 +184,7 @@ export default function ProfileForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
         <FormField
           control={form.control}
           name="bio"
@@ -150,7 +206,7 @@ export default function ProfileForm() {
             </FormItem>
           )}
         />
-        <div>
+        {/* <div>
           {fields.map((field, index) => (
             <FormField
               control={form.control}
@@ -181,7 +237,13 @@ export default function ProfileForm() {
           >
             Add URL
           </Button>
-        </div>
+        </div> */}
+        {/* Error Handling */}
+        {errorMessage && (
+          <p className="text-sm font-medium text-red-500 dark:text-red-900">
+            {errorMessage}
+          </p>
+        )}
         <Button type="submit">Update profile</Button>
       </form>
     </Form>

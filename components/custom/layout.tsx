@@ -11,12 +11,14 @@ const LayoutContext = React.createContext<{
 interface LayoutProps extends React.HTMLAttributes<HTMLDivElement> {
   fixed?: boolean;
 }
+interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  sticky?: boolean;
+}
 
-const Layout: React.FC<LayoutProps> = ({
-  className,
-  fixed = false,
-  ...props
-}) => {
+const Layout: React.FC<LayoutProps> & {
+  Header: React.FC<HeaderProps>;
+  Body: React.FC<React.HTMLAttributes<HTMLDivElement>>;
+} = ({ className, fixed = false, ...props }) => {
   const divRef = React.useRef<HTMLDivElement>(null);
   const [offset, setOffset] = React.useState(0);
 
@@ -47,11 +49,8 @@ const Layout: React.FC<LayoutProps> = ({
     </LayoutContext.Provider>
   );
 };
-Layout.displayName = "Layout";
 
-interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  sticky?: boolean;
-}
+Layout.displayName = "Layout";
 
 const Header = React.forwardRef<HTMLDivElement, HeaderProps>(
   ({ className, sticky, ...props }, ref) => {

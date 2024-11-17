@@ -11,8 +11,11 @@ interface CarouselProps {
 
 const Carousel: React.FC<CarouselProps> = ({ images }) => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const totalSlides = images.length;
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const [validImages, setValidImages] = useState<string[]>(images);
+
+  const totalSlides = validImages.length;
+
   const prevSlide = () => {
     setActiveIndex((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
   };
@@ -24,22 +27,24 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
   const goToSlide = (index: number) => {
     setActiveIndex(index);
   };
+
   const handleImageClick = (image: string) => {
     setZoomedImage(image);
   };
 
-  const closeZoom = () => {
-    setZoomedImage(null);
+  const handleImageError = (image: string) => {
+    // Filter out the invalid image from the list
+    setValidImages((prevImages) => prevImages.filter((img) => img !== image));
   };
+
   return (
     <div className="relative w-full" data-carousel="slide">
       {/* Carousel Images */}
       <div className="relative h-56 overflow-hidden rounded-lg md:h-96">
-        {images.map((image, index) => (
-          <Dialog>
+        {validImages.map((image, index) => (
+          <Dialog key={uuidv4()}>
             <DialogTrigger asChild>
               <div
-                key={uuidv4()}
                 className={`${activeIndex === index ? "block" : "hidden"} duration-700 ease-in-out`}
                 data-carousel-item
               >
@@ -48,19 +53,22 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
                   alt={`Slide ${index + 1}`}
                   width={500}
                   height={500}
-                  className="absolute left-1/2 top-1/2 block aspect-[3/4] size-full -translate-x-1/2 -translate-y-1/2 scale-100 object-cover blur-0 grayscale-0 transition-all hover:scale-105 cursor-pointer"
+                  className="absolute left-1/2 top-1/2 block aspect-[3/4] size-full -translate-x-1/2 -translate-y-1/2 scale-100 cursor-pointer object-cover blur-0 grayscale-0 transition-all hover:scale-105"
                   onClick={() => handleImageClick(image)} // Trigger zoom on click
+                  onError={() => handleImageError(image)} // Handle image loading errors
                 />
               </div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] r p-0 bg-transparent">
-              <Image
-                src={image}
-                alt="Zoomed Image"
-                width={1000}
-                height={1000}
-                className="object-contain max-w-full max-h-full"
-              />
+            <DialogContent className="bg-transparent p-0 sm:max-w-[425px]">
+              {zoomedImage === image && (
+                <Image
+                  src={image}
+                  alt="Zoomed Image"
+                  width={1000}
+                  height={1000}
+                  className="max-h-full max-w-full object-contain"
+                />
+              )}
             </DialogContent>
           </Dialog>
         ))}
@@ -68,7 +76,7 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
 
       {/* Navigation Buttons */}
       <div className="absolute bottom-5 left-1/2 z-30 flex -translate-x-1/2 space-x-3 rtl:space-x-reverse">
-        {images.map((_, index) => (
+        {validImages.map((_, index) => (
           <button
             key={uuidv4()}
             type="button"
@@ -81,7 +89,7 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
       </div>
 
       {/* Previous Button */}
-      {images.length > 0 && (
+      {validImages.length > 1 && (
         <button
           type="button"
           className="group absolute start-0 top-0 z-30 flex h-full cursor-pointer items-center justify-center px-4 focus:outline-none"
@@ -110,7 +118,7 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
       )}
 
       {/* Next Button */}
-      {images.length > 0 && (
+      {validImages.length > 1 && (
         <button
           type="button"
           className="group absolute end-0 top-0 z-30 flex h-full cursor-pointer items-center justify-center px-4 focus:outline-none"

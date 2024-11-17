@@ -1,4 +1,5 @@
 "use client";
+import { v4 as uuidv4 } from "uuid";
 import Image from "next/image";
 import ThreadsTab from "@/components/shared/ThreadsTab";
 import ProfileHeader from "@/components/shared/ProfileHeader";
@@ -8,6 +9,10 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "react-query";
 import { getUserById } from "@/apis/user";
 import { getThreadsByUser } from "@/apis/threads";
+import ThreadCard from "@/components/cards/ThreadCard";
+import ThreadCardSekeleton from "@/components/cards/ThreadCardSekeleton";
+import { useEffect, useRef, useState } from "react";
+import { throttle } from "@/lib/utils";
 
 const profileTabs = [
   { value: "threads", label: "Threads", icon: "/assets/reply.svg" },
@@ -16,9 +21,14 @@ const profileTabs = [
 ];
 
 export default function Page({ params }: Readonly<{ params: { id: string } }>) {
+  const [pageNumber, setPageNumber] = useState(1);
   const router = useRouter();
+  const pageSize = 3;
   const currentUser = useUserStore((state) => state.user);
   const profileId = params.id;
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [threads, setThreads] = useState<any[]>([]);
+  const loaderRef = useRef<HTMLDivElement>(null);
   const { data: userData } = useQuery({
     queryKey: ["user", profileId],
     queryFn: () => getUserById({ id: profileId }),
@@ -28,25 +38,47 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
     enabled: !!profileId,
   });
   const { data: threadsData, isLoading: isLoadingThreadsData } = useQuery({
-    queryKey: ["threadsById", profileId],
-    queryFn: () => getThreadsByUser({ id: profileId }),
+    queryKey: ["threadsById", profileId, pageNumber],
+    queryFn: () => getThreadsByUser({ id: profileId, pageNumber, pageSize }),
     onError: (error) => {
       console.error("Error fetching  data:", error);
     },
     enabled: !!profileId,
   });
-  console.log(params);
-  console.log(profileId);
+  const handleScroll = throttle(() => {
+    if (loaderRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = loaderRef.current;
+      if (scrollHeight - scrollTop <= clientHeight + 100 && !isLoadingMore) {
+        setIsLoadingMore(true);
+        setPageNumber((prev) => prev + 1);
+      }
+    }
+  }, 200);
+  useEffect(() => {
+    if (threadsData?.threads) {
+      setThreads((prevThreads) => [...prevThreads, ...threadsData.threads]);
+      setIsLoadingMore(false);
+    }
+  }, [threadsData]);
+  useEffect(() => {
+    const divRef = loaderRef.current;
+    divRef?.addEventListener("scroll", handleScroll);
+
+    return () => {
+      divRef?.removeEventListener("scroll", handleScroll);
+    };
+  }, [handleScroll]);
   if (currentUser?.onboarded === false) {
     router.push("/onboarding");
   }
   if (!userData) return <>ko tìm thấy user</>;
-  console.log(userData);
-  console.log(threadsData);
   return (
     <section>
       <ProfileHeader data={userData} />
-      <div className="mt-9">
+      <div
+        ref={loaderRef}
+        className="no-scrollbar mt-9 max-h-[80vh] overflow-auto"
+      >
         <Tabs defaultValue="threads" className="w-full">
           <TabsList className="flex min-h-[50px] flex-1 items-center justify-evenly gap-3 bg-light-1 text-primary shadow-md data-[state=active]:shadow-none dark:bg-dark-4 dark:text-light-2 dark:data-[state=active]:bg-[#0e0e12]">
             {profileTabs.map((tab) => (
@@ -88,6 +120,24 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
             </TabsContent>
           ))}
         </Tabs>
+        <div className="my-4">
+          {isLoadingThreadsData && threads?.length === 0 ? (
+            Array(5)
+              .fill(0)
+              .map(() => <ThreadCardSekeleton key={uuidv4()} />)
+          ) : threads?.length === 0 ? (
+            <p className="no-result">No comments found</p>
+          ) : (
+            threads?.map((thread) => (
+              <ThreadCard
+                threadUrl={`http://localhost:3000/thread/${thread?._id}`}
+                className="mt-2"
+                key={thread._id}
+                data={thread}
+              />
+            ))
+          )}
+        </div>
       </div>
     </section>
   );

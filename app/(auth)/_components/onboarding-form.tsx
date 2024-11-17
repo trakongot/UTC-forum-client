@@ -4,7 +4,7 @@ import { z } from "zod";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
@@ -51,32 +51,22 @@ export const OnboardingForm = () => {
   const [file, setFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null); // URL tạm thời cho ảnh
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
   // API mutation setup with React Query
-  const { isLoading, mutate: mutateOnboarding } = useMutation(
-    async (data: {
-      name: string;
-      username: string;
-      bio: string;
-      img: File;
-    }) => {
-      return updateUserOnboarded(data.name, data.username, data.bio, data.img);
+  const {isLoading, mutate: mutateOnboarding } = useMutation({
+    mutationFn: updateUserOnboarded,
+    onSuccess: (data: { user: User }) => {
+      updateUser(data.user);
+      router.push("./");
     },
-    {
-      onSuccess: (data: { user: User }) => {
-        updateUser(data.user);
-        if (data?.user?.onboarded) router.push("./");
-      },
-      onError: (error: any) => {
-        console.error("Error updating user:", error);
-        const errMessage =
-          error?.response?.data?.error ||
-          "Server error, please try again later";
-        setErrorMessage(errMessage); // Set error message from API
-      },
-    }
-  );
-
+    onError: (error: any) => {
+      console.error("Error updating user:", error);
+      const errMessage =
+        error?.response?.data?.error ||
+        "Server error, please try again later";
+      setErrorMessage(errMessage); // Set error message from API
+    },
+  })
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

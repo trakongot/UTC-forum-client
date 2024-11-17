@@ -49,13 +49,36 @@ export const getThreadById = async ({
 };
 export const getThreadsByUser = async ({
   id,
+  pageNumber = 1,
+  pageSize = 20,
 }: {
   id: string;
+  pageNumber?: number;
+  pageSize?: number;
 }): Promise<ThreadsListResponse> => {
   if (!id) throw new Error("Thread ID is required");
-  const response = await axiosClient.get(`/threads/${id}`);
+  const response = await axiosClient.get(`/threads/${id}/byUser`, {
+    params: { pageNumber, pageSize },
+  });
   if (response.data.error) {
     throw new Error(response.data.error);
   }
   return response.data as ThreadsListResponse;
+};
+export const createThread = async ({
+  text,
+  imgs,
+}: {
+  text: string;
+  imgs?: File;
+}): Promise<{ user: Thread }> => {
+  const formData = new FormData();
+  formData.append("text", text);
+  if (imgs) formData.append("imgs", imgs);
+
+  const response = await axiosClient.post(`/threads`, formData);
+  if (response.data.error) {
+    throw new Error(response.data.error);
+  }
+  return response.data as { user: Thread };
 };

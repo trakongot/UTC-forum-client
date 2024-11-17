@@ -15,7 +15,6 @@ const LeftSidebar = () => {
   const pathname = usePathname();
   const { LeftSidebarOpened, toggleTrigger } = useTriggerStore();
   const userId = useUserStore((state) => state?.user?._id);
-
   return (
     <section
       className={`custom-scrollbar sticky left-0 top-0 z-20 flex h-screen ${
@@ -29,15 +28,24 @@ const LeftSidebar = () => {
           const isActive =
             (pathname.includes(link.route) && link.route.length > 1) ||
             pathname === link.route;
+
+          const isCreateThreadLink = link.route === "/create-thread";
+
           if (link.route === "/profile" && userId)
             link.route = `${link.route}/${userId}`;
+
           return (
             <Link
-              href={link.route}
+              href={isCreateThreadLink ? "#" : link.route}
               key={link.label}
               className={`relative flex justify-start gap-4 rounded-lg p-4 ${
                 isActive && "bg-light-5 dark:bg-primary-500"
               }`}
+              onClick={
+                isCreateThreadLink
+                  ? () => toggleTrigger("isCreateThreadCardOpened")
+                  : undefined
+              }
             >
               <Image
                 src={link.imgURL}

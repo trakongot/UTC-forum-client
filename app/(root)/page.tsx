@@ -1,13 +1,13 @@
 "use client";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
-import Pagination from "@/components/shared/Pagination";
 import ThreadCard from "@/components/cards/ThreadCard";
 import { getThreads } from "@/apis/threads";
 import { useQuery } from "react-query";
 import useUserStore from "@/store/useUserStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import ThreadCardSekeleton from "@/components/cards/ThreadCardSekeleton";
+import { throttle } from "@/lib/utils";
 
 export default function Home({
   searchParams,
@@ -16,52 +16,82 @@ export default function Home({
 }>) {
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 3;
+  const [threads, setThreads] = useState<any[]>([]);
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+
   const router = useRouter();
   const user = useUserStore((state) => state.user);
+
+  // Redirect to onboarding if user has not completed it
   useEffect(() => {
     if (user?.onboarded === false) {
       router.push("/onboarding");
     }
-  }, [user]);
-  // api react query
-  const { data, isLoading } = useQuery({
-    queryKey: ["threads", pageNumber],
-    queryFn: () => getThreads({ pageNumber, pageSize }),
-    keepPreviousData: true,
-    onError: (err) => {
-      console.error("Error fetching threads:", err);
-    },
-  });
-  // end api react query
+  }, [user, router]);
+
+  // Fetch threads data using React Query
+  const { isLoading, isFetching } = useQuery(
+    ["threads", pageNumber],
+    () => getThreads({ pageNumber, pageSize }),
+    {
+      keepPreviousData: true,
+      onSuccess: (newData) => {
+        setThreads((prevThreads) => [...prevThreads, ...newData.threads]);
+      },
+      onError: (err) => {
+        console.error("Error fetching threads:", err);
+      },
+    }
+  );
+
+  // Infinite scroll handler with throttle
+  useEffect(() => {
+    const handleScroll = throttle(() => {
+      if (loaderRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = loaderRef.current;
+        if (scrollHeight - scrollTop <= clientHeight + 100 && !isFetching) {
+          setPageNumber((prev) => prev + 1);
+        }
+      }
+    }, 300); // Adjust delay as needed
+
+    const divRef = loaderRef.current;
+    divRef?.addEventListener("scroll", handleScroll);
+
+    return () => {
+      divRef?.removeEventListener("scroll", handleScroll);
+    };
+  }, [isFetching]);
+
   return (
     <>
       <h1 className="head-text text-left text-2xl font-bold text-dark-1 dark:text-light-1">
         Trending Threads
       </h1>
 
-      <section className="mt-9 flex flex-col gap-10">
-        {(() => {
-          if (isLoading) {
-            return Array(5)
+      <section
+        ref={loaderRef}
+        className="no-scrollbar mt-9 flex max-h-[80vh] flex-col gap-10 overflow-auto"
+      >
+        {isLoading && threads.length === 0
+          ? Array(5)
               .fill(0)
-              .map(() => <ThreadCardSekeleton key={uuidv4()} />);
-          }
+              .map(() => <ThreadCardSekeleton key={uuidv4()} />)
+          : threads.map((thread) => (
+              <ThreadCard
+                threadUrl={thread._id}
+                displayType={2}
+                key={thread._id}
+                data={thread}
+              />
+            ))}
+        {!isLoading && threads.length === 0 && (
+          <p className="no-result">No threads found</p>
+        )}
 
-          if (data?.threads.length === 0) {
-            return <p className="no-result">No threads found</p>;
-          }
-
-          return data?.threads.map((thread) => (
-            <ThreadCard displayType={2} key={thread._id} data={thread} />
-          ));
-        })()}
+        {isFetching && <ThreadCardSekeleton key={uuidv4()} />}
+        <div />
       </section>
-
-      <Pagination
-        path="/"
-        pageNumber={searchParams?.page ? +searchParams.page : 1}
-        isNext={data?.isNext ?? false}
-      />
     </>
   );
 }

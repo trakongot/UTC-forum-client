@@ -11,7 +11,46 @@ export function isBase64Image(imageData: string) {
   const base64Regex = /^data:image\/(png|jpe?g|gif|webp);base64,/;
   return base64Regex.test(imageData);
 }
+export function throttle<T extends (...args: any[]) => void>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let lastFunc: NodeJS.Timeout | null = null;
+  let lastRan: number | null = null;
 
+  return function (this: unknown, ...args: Parameters<T>) {
+    const context = this;
+    const now = Date.now();
+
+    if (!lastRan || now - lastRan >= limit) {
+      func.apply(context, args);
+      lastRan = now;
+    } else {
+      if (lastFunc) {
+        clearTimeout(lastFunc);
+      }
+      lastFunc = setTimeout(
+        () => {
+          if (Date.now() - lastRan! >= limit) {
+            func.apply(context, args);
+            lastRan = Date.now();
+          }
+        },
+        limit - (now - lastRan)
+      );
+    }
+  };
+}
+export const copyLink = (url: string) => {
+  navigator.clipboard
+    .writeText(url)
+    .then(() => {
+      alert("Link copied to clipboard!"); 
+    })
+    .catch((error) => {
+      alert("Failed to copy link: " + error);
+    });
+};
 // created by chatgpt
 export function formatDateString(dateString: string) {
   const options: Intl.DateTimeFormatOptions = {

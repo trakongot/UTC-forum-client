@@ -1,8 +1,10 @@
+import { getUserByCookies } from "@/apis/user";
 import { User } from "@/types/userType";
 import { create } from "zustand";
 
 interface UserStore {
   user: User | null;
+  hydrateUser: () => void;
   setUser: (user: User) => void;
   updateUser: (updatedFields: Partial<User>) => void;
   followUser: (userId: string) => void;
@@ -27,6 +29,14 @@ interface UserStore {
 
 const useUserStore = create<UserStore>((set) => ({
   user: null,
+  hydrateUser: async () => {
+    try {
+      const user = await getUserByCookies();
+      set({ user });
+    } catch (error) {
+      console.error("Failed to hydrate user:", error);
+    }
+  },
   setUser: (user) => set({ user }),
   updateUser: (updatedFields) =>
     set((state) => ({

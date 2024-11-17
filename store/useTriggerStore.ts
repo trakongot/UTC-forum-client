@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 interface TriggerState {
   LeftSidebarOpened: boolean;
-
+  isCreateThreadCardOpened: boolean;
   //   setTrigger: (
   //     triggerName: keyof Omit<TriggerState, "setTrigger" | "toggleTrigger">,
   //     value: boolean
@@ -14,7 +14,7 @@ interface TriggerState {
 
 const useTriggerStore = create<TriggerState>((set, get) => ({
   LeftSidebarOpened: false,
-
+  isCreateThreadCardOpened: false,
   //   setTrigger: (triggerName, value) =>
   //     set((state) => ({ ...state, [triggerName]: value })),
 
