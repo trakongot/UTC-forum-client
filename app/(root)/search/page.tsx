@@ -1,42 +1,31 @@
-import UserCard from "@/components/cards/UserCard";
+// app/(root)/search/page.tsx
+"use client";
+import { useRouter } from "next/navigation";
 import Searchbar from "@/components/shared/Searchbar";
-import Pagination from "@/components/shared/Pagination";
 
-export default function Page({
-  searchParams,
-}: Readonly<{
-  searchParams: { [key: string]: string | undefined };
-}>) {
+export default function Page() {
+  const router = useRouter();
+
+  // Hàm khi người dùng nhấn Enter để tìm kiếm
+  const handleSearchSubmit = (query: string) => {
+    if (query) {
+      // Chuyển hướng đến URL tìm kiếm với query
+      router.push(`/search/searchResult?query=${query}`);
+    }
+  };
+
   return (
-    <section className="rounded-xl bg-light-1 p-10 shadow-md">
-      <h1 className="head-text mb-10">Search</h1>
-
-      <Searchbar routeType="search" />
-
-      <div className="mt-14 flex flex-col gap-9 py-2">
-        {/* {result.users.length === 0 ? (
-          <p className="no-result">No Result</p>
-        ) : (
-          <>
-            {result.users.map((person) => (
-              <UserCard
-                key={person.id}
-                id={person.id}
-                name={person.name}
-                username={person.username}
-                imgUrl={person.image}
-                personType="User"
-              />
-            ))}
-          </>
-        )} */}
-      </div>
-
-      {/* <Pagination
-        path="search"
-        pageNumber={searchParams?.page ? +searchParams.page : 1}
-        isNext={result.isNext}
-      /> */}
-    </section>
+    <div className="flex flex-col justify-between">
+      <section
+        className="rounded-xl bg-light-1 p-10 shadow-md"
+        style={{ height: "910px" }}
+      >
+        {/* Thanh tìm kiếm */}
+        <Searchbar
+          onSearch={handleSearchSubmit}
+          routeType="search" // Hoặc tùy thuộc vào điều kiện nào đó
+        />
+      </section>
+    </div>
   );
 }
