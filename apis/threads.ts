@@ -1,5 +1,6 @@
 import axiosClient from "@/lib/userApi";
 import { Thread } from "@/types/threadType";
+
 type ThreadsListResponse = {
   success: boolean;
   threads: Thread[];
@@ -81,4 +82,18 @@ export const createThread = async ({
     throw new Error(response.data.error);
   }
   return response.data as { user: Thread };
+};
+
+export const likeThread = async ({
+  id,
+}: {
+  id: string; // Đảm bảo `id` được truyền vào
+  
+}): Promise<{ user: Thread }> => {
+  if (!id) throw new Error("Thread ID is required");
+    const response = await axiosClient.post(`/threads/${id}/like`, );
+    if (response.data.error) {
+      throw new Error(response.data.error);
+    }
+    return response.data as { user: Thread };
 };

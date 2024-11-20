@@ -14,7 +14,7 @@ import {
 import useTriggerStore from "@/store/useTriggerStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import useUserStore from "@/store/useUserStore";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Menubar,
   MenubarContent,
@@ -24,12 +24,28 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "../ui/menubar";
+import { logoutUser } from "@/apis/auth";
+import { useMutation } from "react-query";
 function Topbar() {
   const { LeftSidebarOpened } = useTriggerStore();
   const avatarUrl = useUserStore((state) => state.user?.profilePic);
   const pathname = usePathname();
   const isProfilePage = pathname.includes("/profile");
+  const router = useRouter()
+  const { mutate: mutatelogout } = useMutation({
+   mutationFn: logoutUser,
+   onSuccess: () => {
+     router.push("./sign-in");
 
+   },
+   onError: (error: any) => {
+     console.error("Error updating user:", error);
+     const errMessage =
+       error?.response?.data?.error ||
+       "Server error, please try again later";
+     errMessage(errMessage); // Set error message from API
+   },
+ })
   return (
     <nav className="fixed top-0 z-30 flex w-full items-center justify-between bg-light-1 px-8 py-5 shadow-xl dark:bg-dark-2 lg:bg-transparent lg:shadow-none">
       <Link href="/" className="flex items-center gap-4">
@@ -91,8 +107,9 @@ function Topbar() {
                   Settings
                   <Settings className="ml-2 size-4  cursor-pointer" />
                 </MenubarItem>
-
-                <MenubarItem className="flex cursor-default items-center justify-between py-2">
+                
+                <MenubarItem className="flex cursor-default items-center justify-between py-2"
+                onClick={() => mutatelogout() }>
                   Log out
                   <LogOut className="ml-2 size-4  cursor-pointer" />
                 </MenubarItem>

@@ -27,18 +27,18 @@ const formSchema = z.object({
   name: z
     .string()
     .min(3, { message: "Minimum 3 characters." })
-    .max(15, { message: "Maximum 15 characters." }),
+    .max(200, { message: "Maximum 15 characters." }),
   username: z
     .string()
     .min(3, { message: "Minimum 3 characters." })
-    .max(15, { message: "Maximum 14 characters." })
+    .max(200, { message: "Maximum 14 characters." })
     .regex(/^[a-zA-Z0-9_]+$/, {
       message:
         "Username must contain only letters, numbers, and underscores, and no spaces or special characters.",
     }),
   bio: z
     .string()
-    .min(3, { message: "Minimum 3 characters." })
+    .min(0, { message: "Minimum 3 characters." })
     .max(1000, { message: "Maximum 1000 characters." }),
 });
 

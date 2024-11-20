@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { sidebarLinks } from "@/constants";
 import useUserStore from "@/store/useUserStore";
@@ -10,11 +10,40 @@ import { Button } from "../custom/button";
 import { IconChevronsLeft } from "@tabler/icons-react";
 import { LogOut } from "lucide-react";
 import useTriggerStore from "@/store/useTriggerStore";
+import { useMutation } from "react-query";
+import { logoutUser } from "@/apis/auth";
+
+
 
 const LeftSidebar = () => {
   const pathname = usePathname();
   const { LeftSidebarOpened, toggleTrigger } = useTriggerStore();
   const userId = useUserStore((state) => state?.user?._id);
+  
+  // const handleLogout = async (): Promise<User> => {
+  // const response = await axiosClient.post("/users/logout");
+  // if (response.data.error) {
+  //   throw new Error(response.data.error);
+  // }
+  // return response.data as User;
+  // };
+  const router = useRouter()
+   const { mutate: mutatelogout } = useMutation({
+    mutationFn: logoutUser,
+    onSuccess: () => {
+      router.push("./sign-in");
+
+    },
+    onError: (error: any) => {
+      console.error("Error updating user:", error);
+      const errMessage =
+        error?.response?.data?.error ||
+        "Server error, please try again later";
+      errMessage(errMessage); // Set error message from API
+    },
+  })
+  
+
   return (
     <section
       className={`custom-scrollbar sticky left-0 top-0 z-20 flex h-screen ${
@@ -62,11 +91,12 @@ const LeftSidebar = () => {
           );
         })}
       </div>
-      <div className="mt-10 px-6">
+      <div className="mt-10 px-6"
+      onClick={() => mutatelogout() }>
         <div className="flex cursor-pointer gap-4 p-4">
           <LogOut className="size-6" />
           {LeftSidebarOpened && (
-            <p className="dark:text-light-2 max-lg:hidden">Logout</p>
+            <p className="dark:text-light-2 max-lg:hidden" >Logout</p>
           )}
         </div>
       </div>

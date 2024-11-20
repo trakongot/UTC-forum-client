@@ -25,6 +25,13 @@ import {
 } from "lucide-react";
 import { Thread } from "@/types/threadType";
 import { copyLink, formatDateString } from "@/lib/utils";
+import { useMutation } from "react-query";
+import { likeThread } from "@/apis/threads";
+import { useRouter } from "next/navigation";
+
+
+
+
 type Props = {
   data: Thread;
   displayType?: 1 | 2;
@@ -38,9 +45,12 @@ export function ThreadCard({
   threadUrl,
 }: Readonly<Props>) {
   const [isLiked, setIsLiked] = useState(data.isliked);
-
-  const toggleLike = () => {
+  const [likeCount, setLikeCount] = useState(data.likeCount);
+  const handlerLike = () => {
+    if (isLiked) setLikeCount(prevlikeCount=> prevlikeCount-1);
+    else setLikeCount(prevlikeCount=> prevlikeCount +1);
     setIsLiked((prevIsLiked) => !prevIsLiked);
+    mutatelike();
   };
   const quoteThread = `<blockquote class="text-post-media" data-text-post-permalink="${threadUrl}" id="ig-tp-DCYbxucSdAf" style="background:#FFF; border-width: 1px; border-style: solid; border-color: #00000026; border-radius: 16px; max-width:540px; margin: 1px; min-width:270px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);">
       <a href="${threadUrl}" style="background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif;" target="_blank">
@@ -56,6 +66,22 @@ export function ThreadCard({
     </blockquote>
     <script async src="https://www.threads.net/embed.js"></script>
     `;
+    const router = useRouter()
+    const { mutate: mutatelike } = useMutation({
+      mutationFn:() =>  likeThread({id : threadUrl}),
+      onSuccess: () => {
+        router.push("./");
+      },
+      onError: (error: any) => {
+        console.error("Error liking thread:", error);
+        const errMessage =
+          error?.response?.data?.error ||
+          "Server error, please try again later";
+        alert(errMessage); 
+      },
+    });
+    
+
   return (
     <article
       className={`flex w-full flex-col rounded-xl bg-light-1 p-7 shadow-lg brightness-105 dark:bg-dark-2 ${className}`}
@@ -148,16 +174,16 @@ export function ThreadCard({
             <div className={`mt-5 flex flex-col gap-3`}>
               <div className="flex gap-3.5">
                 <button
-                  onClick={toggleLike}
+                  onClick={() => handlerLike()}
                   className="flex items-center rounded-full px-2 py-1 transition-all duration-150 hover:bg-[#e1e1e1] active:scale-95"
                 >
                   {isLiked ? (
-                    <HeartFilledIcon className="mr-px mt-px size-6 cursor-pointer object-contain text-red-600" />
+                    <HeartFilledIcon  className="mr-px mt-px size-6 cursor-pointer object-contain text-red-600" />
                   ) : (
-                    <HeartIcon className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
+                    <HeartIcon  className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
                   )}
                   <span className="ml-1 text-sm text-light-4">
-                    {data?.likeCount}
+                    {likeCount}
                   </span>
                 </button>
 

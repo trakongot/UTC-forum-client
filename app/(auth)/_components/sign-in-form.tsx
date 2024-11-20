@@ -16,7 +16,7 @@ import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { HTMLAttributes, useEffect, useState } from "react";
+import { HTMLAttributes, useState } from "react";
 import useUserStore from "@/store/useUserStore";
 import { useMutation } from "react-query";
 import { signinUser } from "@/apis/auth";

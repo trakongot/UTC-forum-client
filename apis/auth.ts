@@ -33,3 +33,11 @@ export const signupUser = async ({
   }
   return response.data as User;
 };
+
+export const logoutUser = async () : Promise<User> =>{
+  const response = await axiosClient.post("/users/logout")
+  if (response.data.error) {
+    throw new Error(response.data.error);
+  }
+  return response.data as User;
+}
