@@ -15,7 +15,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const threadId = params.id;
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 3;
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(true);
   const [comments, setComments] = useState<any[]>([]);
   const loaderRef = useRef<HTMLDivElement>(null);
 

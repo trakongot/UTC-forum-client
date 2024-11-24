@@ -18,7 +18,7 @@ export default function Page() {
 //   const [selectedRange, setSelectedRange] =
 //     React.useState<undefined>(undefined);
   return (
-    <div className="flex-col md:flex">
+    <div className="flex-col px-10 py-3 md:flex md:py-10">
       <div className="flex-1 space-y-4">
         <div className="flex-col items-center justify-between space-y-2 md:flex md:flex-row">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>

@@ -1,7 +1,6 @@
 "use client";
 
 import { z } from "zod";
-import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
@@ -22,6 +21,7 @@ import { User } from "@/types/userType";
 import { useMutation } from "react-query";
 import { updateUserOnboarded } from "@/apis/user";
 import useUserStore from "@/store/useUserStore";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const formSchema = z.object({
   name: z
@@ -52,7 +52,7 @@ export const OnboardingForm = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null); // URL tạm thời cho ảnh
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   // API mutation setup with React Query
-  const {isLoading, mutate: mutateOnboarding } = useMutation({
+  const { isLoading, mutate: mutateOnboarding } = useMutation({
     mutationFn: updateUserOnboarded,
     onSuccess: (data: { user: User }) => {
       updateUser(data.user);
@@ -61,12 +61,11 @@ export const OnboardingForm = () => {
     onError: (error: any) => {
       console.error("Error updating user:", error);
       const errMessage =
-        error?.response?.data?.error ||
-        "Server error, please try again later";
+        error?.response?.data?.error || "Server error, please try again later";
       setErrorMessage(errMessage); // Set error message from API
     },
-  })
-  
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -114,23 +113,16 @@ export const OnboardingForm = () => {
       >
         <FormItem className="flex items-center gap-4">
           <FormLabel>
-            {imagePreview ? (
-              <Image
-                src={imagePreview}
-                alt="profile_icon"
-                priority
-                width={96}
-                height={96}
-                className="rounded-full"
-              />
-            ) : (
-              <Image
-                src="/assets/profile.svg"
-                alt="profile_icon"
-                width={24}
-                height={24}
-                className="rounded-full object-contain"
-              />
+            {imagePreview && (
+              <Avatar className="size-24">
+                <AvatarImage src={imagePreview} alt="avatar" />
+                <AvatarFallback>
+                  <AvatarImage
+                    src="https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png"
+                    alt="avatar"
+                  />
+                </AvatarFallback>
+              </Avatar>
             )}
           </FormLabel>
           <FormControl className="flex-1 font-semibold">

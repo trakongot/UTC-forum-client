@@ -17,6 +17,8 @@ import {
   IconTool,
   IconUser,
 } from "@tabler/icons-react";
+import { Toaster } from "@/components/ui/toaster";
+import { ScrollArea } from "@/components/ui/scroll-area";
 export const metadata: Metadata = {
   title: "Threads",
 };
@@ -60,9 +62,9 @@ export default function RootLayout({
                   <aside className="top-0 lg:sticky lg:w-1/5">
                     <SidebarNav items={sidebarNavItems} />
                   </aside>
-                  <div className="flex w-full p-1 pr-4 md:overflow-y-hidden">
+                  <ScrollArea className="flex h-[500px] w-full p-1 pr-4 md:overflow-y-hidden">
                     {children}
-                  </div>
+                  </ScrollArea>
                 </div>
               </Layout.Body>
             </Layout>
@@ -70,6 +72,7 @@ export default function RootLayout({
         </section>
       </main>
       <Bottombar />
+      <Toaster />
     </>
   );
 }

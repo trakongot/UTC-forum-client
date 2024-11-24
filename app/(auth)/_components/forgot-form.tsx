@@ -34,7 +34,7 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log(data);
+    // console.log(data);
 
     setTimeout(() => {
       setIsLoading(false);

@@ -1,5 +1,5 @@
 import ContentSection from "../components/content-section";
-import ProfileForm from "./profile-form";
+import ProfileForm from "../components/profile-form";
 
 export default function Page() {
   return (

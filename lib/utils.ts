@@ -1,3 +1,4 @@
+import { toast } from "@/components/ui/use-toast";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -5,7 +6,21 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+export const isImage = (url: string) => {
+  const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
+  return imageExtensions.some((extension) =>
+    url.toLowerCase().endsWith(extension)
+  );
+};
 
+export function isVideo(url: string): boolean {
+  const videoExtensions = [".mp4", ".webm", ".ogg"];
+  const videoMimeTypes = ["video/mp4", "video/webm", "video/ogg"];
+  return (
+    videoExtensions.some((ext) => url.endsWith(ext)) ||
+    videoMimeTypes.some((type) => url.includes(type))
+  );
+}
 // created by chatgpt
 export function isBase64Image(imageData: string) {
   const base64Regex = /^data:image\/(png|jpe?g|gif|webp);base64,/;
@@ -45,7 +60,9 @@ export const copyLink = (url: string) => {
   navigator.clipboard
     .writeText(url)
     .then(() => {
-      alert("Link copied to clipboard!");
+      toast({
+        title: "Link copied to clipboard!",
+      });
     })
     .catch((error) => {
       alert("Failed to copy link: " + error);

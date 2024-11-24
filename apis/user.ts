@@ -1,29 +1,26 @@
 import axiosClient from "@/lib/userApi";
 import { User } from "@/types/userType";
 
-export const updateUser = async (
-  userId: string,
-  name: string,
-  username: string,
-  bio: string,
-  profilePic: string | null,
-  imgs: File[] | null
-): Promise<User> => {
+export const updateUser = async ({
+  name,
+  username,
+  bio,
+  img,
+}: {
+  name: string;
+  username: string;
+  bio: string;
+  img: File | null;
+}): Promise<User> => {
   const formData = new FormData();
+
   formData.append("name", name);
   formData.append("username", username);
   formData.append("bio", bio);
-  if (profilePic) formData.append("profilePic", profilePic);
-  if (imgs) {
-    imgs.forEach((img) => {
-      formData.append("imgs", img);
-    });
-  }
-  const response = await axiosClient.put(`/users/${userId}`, formData);
+  if (img) formData.append("img", img);
 
-  if (response.data.error) {
-    throw new Error(response.data.error);
-  }
+  const response = await axiosClient.put(`/users/`, formData);
+  if (response.data.error) throw new Error(response.data.error);
 
   return response.data as User;
 };
@@ -33,12 +30,17 @@ export const updateUserOnboarded = async ({
   username,
   bio,
   img,
+}: {
+  name: string;
+  username: string;
+  bio: string;
+  img: File | null;
 }): Promise<{ user: User }> => {
   const formData = new FormData();
   formData.append("name", name);
   formData.append("username", username);
   formData.append("bio", bio);
-  formData.append("img", img);
+  if (img) formData.append("img", img);
 
   const response = await axiosClient.post(`/users/onboarded`, formData);
   if (response.data.error) {
@@ -59,4 +61,17 @@ export const getUserByCookies = async (): Promise<User> => {
     throw new Error(response.data.error);
   }
   return response.data as User;
+};
+export const logoutUser = async (): Promise<{
+  success: boolean;
+  message: string;
+}> => {
+  const response = await axiosClient.post("/users/logout");
+  if (response.data.error) {
+    throw new Error(response.data.error);
+  }
+  return response.data as {
+    success: boolean;
+    message: string;
+  };
 };

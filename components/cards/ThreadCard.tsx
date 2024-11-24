@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import Carousel from "../custom/carousel";
@@ -22,25 +21,71 @@ import {
   ListXIcon,
   MessageCircleIcon,
   Repeat2,
+  Trash2Icon,
 } from "lucide-react";
 import { Thread } from "@/types/threadType";
 import { copyLink, formatDateString } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import useTempStore from "@/store/useTempStore";
+import useTriggerStore from "@/store/useTriggerStore";
+import useUserStore from "@/store/useUserStore";
+import { DialogContent } from "../ui/dialog";
+import { Dialog, DialogTrigger } from "../custom/dialog";
+import { Button } from "../custom/button";
+import { usePathname, useRouter } from "next/navigation";
+import { useMutation } from "react-query";
+import { likeOrUnlikeThread } from "@/apis/threads";
 type Props = {
   data: Thread;
   displayType?: 1 | 2;
   className?: string;
   threadUrl: string;
 };
-export function ThreadCard({
+export default function ThreadCard({
   data,
   displayType = 1,
   className,
   threadUrl,
 }: Readonly<Props>) {
-  const [isLiked, setIsLiked] = useState(data.isliked);
+  const [isLiked, setIsLiked] = useState(data.isLiked);
+  const [likeCount, setLikeCount] = useState(data.likeCount);
+  const { setCurrentThread } = useTempStore();
+  const { toggleTrigger } = useTriggerStore();
+  const { user } = useUserStore();
+  const isOwnerThread = user?._id === data.postedBy._id;
+  const pathname = usePathname();
+  const isProfilePage = pathname.includes("./profile");
 
-  const toggleLike = () => {
+  // API react query
+  const { mutate: mutatelike } = useMutation({
+    mutationFn: () => likeOrUnlikeThread({ id: data._id }),
+    onSuccess: (data) => {
+      setLikeCount(data.likeCount);
+    },
+    onError: (error: any) => {
+      console.error("Error liking thread:", error);
+      // const errMessage =
+      //   error?.response?.data?.error || "Server error, please try again later";
+      // alert(errMessage);
+    },
+  });
+
+  const handlerLike = () => {
+    if (isLiked) setLikeCount((prevlikeCount) => prevlikeCount - 1);
+    else setLikeCount((prevlikeCount) => prevlikeCount + 1);
     setIsLiked((prevIsLiked) => !prevIsLiked);
+    mutatelike();
+  };
+
+  const handleOpenPreviewProfile = () => {
+    toggleTrigger("isPreviewProfileCardOpened");
+  };
+  const handleComment = () => {
+    setCurrentThread(data);
+    toggleTrigger("isCreateThreadCardOpened");
+  };
+  const handleReport = () => {
+    toggleTrigger("isReportCardOpened");
   };
   const quoteThread = `<blockquote class="text-post-media" data-text-post-permalink="${threadUrl}" id="ig-tp-DCYbxucSdAf" style="background:#FFF; border-width: 1px; border-style: solid; border-color: #00000026; border-radius: 16px; max-width:540px; margin: 1px; min-width:270px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);">
       <a href="${threadUrl}" style="background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif;" target="_blank">
@@ -57,151 +102,296 @@ export function ThreadCard({
     <script async src="https://www.threads.net/embed.js"></script>
     `;
   return (
-    <article
-      className={`flex w-full flex-col rounded-xl bg-light-1 p-7 shadow-lg brightness-105 dark:bg-dark-2 ${className}`}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex w-full flex-1 flex-row gap-4">
-          <div className="flex flex-col items-center">
-            <Link
-              href={`/profile/${data._id}`}
-              className="flex w-fit items-center"
-            >
-              <div className="relative size-11 cursor-pointer overflow-hidden">
-                <Image
-                  src={
-                    data.postedBy.profilePic === ""
-                      ? "/img/avatar.png"
-                      : data.postedBy.profilePic
-                  }
-                  alt="avatar_image"
-                  fill
-                  className="cursor-pointer rounded-full"
-                />
-              </div>
-              <div className="relative mt-2 w-0.5 grow rounded-full bg-slate-300 dark:bg-neutral-800" />
-            </Link>
-          </div>
-
-          <div className="flex w-full flex-col">
-            <div className="flex w-full items-center justify-between">
-              <Link
-                href={`/profile/${data._id}`}
-                className="flex w-fit items-center"
-              >
-                <h4 className="cursor-pointer text-2xl font-semibold dark:text-light-1">
-                  {data?.postedBy?.name}
-                </h4>
-                <span className="ml-3 text-xs text-dark-4">
-                  {formatDateString(data?.createdAt)}
-                </span>
-              </Link>
-              <Menubar>
-                <MenubarMenu>
-                  <MenubarTrigger className="flex items-center rounded-full p-2 transition-all duration-150 hover:bg-[#e1e1e1] active:scale-95 data-[state=open]:bg-[#e1e1e1]">
-                    <GripIcon className="size-6 cursor-pointer " />
-                  </MenubarTrigger>
-                  <MenubarContent align="end">
-                    <MenubarItem className="flex cursor-default items-center justify-between py-2">
-                      Save<MenubarShortcut>⌘CTRL + S</MenubarShortcut>
-                    </MenubarItem>
-                    <MenubarItem className="flex cursor-default items-center justify-between py-2">
-                      Not interested
-                      <BellOffIcon className="size-4 cursor-pointer " />
-                    </MenubarItem>
-                    <MenubarSeparator />
-                    <MenubarItem className="flex cursor-default items-center justify-between py-2">
-                      Mute
-                      <BellMinusIcon className="size-4 cursor-pointer " />
-                    </MenubarItem>
-                    <MenubarItem className="flex cursor-default items-center justify-between py-2">
-                      Block
-                      <ListXIcon className="size-4 cursor-pointer" />
-                    </MenubarItem>
-                    <MenubarItem className="flex cursor-default items-center justify-between py-2">
-                      Report
-                      <FlagTriangleRightIcon className="size-4 cursor-pointer" />
-                    </MenubarItem>
-                    <MenubarSeparator />
-                    <MenubarItem
-                      onClick={() => copyLink(threadUrl)}
-                      className="flex cursor-default items-center justify-between py-2"
-                    >
-                      Copy link
-                      <LinkIcon className="size-4 cursor-pointer" />
-                    </MenubarItem>
-                  </MenubarContent>
-                </MenubarMenu>
-              </Menubar>
-            </div>
-            <Link href={`/thread/${data._id}`}>
-              <p className="mt-2 pb-3 text-sm dark:text-light-2 ">
-                {data?.text}
-              </p>
-            </Link>
-            {data?.imgs?.length > 0 &&
-              (displayType === 1 ? (
-                <Carousel images={data.imgs} />
-              ) : (
-                <Carousel2 images={data.imgs} />
-              ))}
-            <div className={`mt-5 flex flex-col gap-3`}>
-              <div className="flex gap-3.5">
-                <button
-                  onClick={toggleLike}
-                  className="flex items-center rounded-full px-2 py-1 transition-all duration-150 hover:bg-[#e1e1e1] active:scale-95"
+    <>
+      <article
+        className={`flex w-full flex-col rounded-xl bg-light-1 p-7 shadow-lg brightness-105 dark:bg-dark-2 ${className}`}
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex w-full flex-1 flex-row gap-4">
+            <div className="flex flex-col items-center">
+              {isProfilePage || isOwnerThread ? (
+                <Link
+                  href={`/thread/${data._id}`}
+                  className="m-0 flex w-fit items-center border-none bg-transparent p-0 text-inherit shadow-none outline-none hover:bg-transparent focus:outline-none active:bg-transparent"
                 >
-                  {isLiked ? (
-                    <HeartFilledIcon className="mr-px mt-px size-6 cursor-pointer object-contain text-red-600" />
-                  ) : (
-                    <HeartIcon className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
-                  )}
-                  <span className="ml-1 text-sm text-light-4">
-                    {data?.likeCount}
-                  </span>
-                </button>
+                  <div className="relative size-11 cursor-pointer overflow-hidden">
+                    {data.postedBy.profilePic && (
+                      <Avatar>
+                        <AvatarImage
+                          sizes=""
+                          src={data.postedBy.profilePic}
+                          alt="avatar"
+                        />
+                        <AvatarFallback>
+                          <AvatarImage
+                            sizes="96"
+                            src="https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png"
+                            alt="avatar"
+                          />
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                  <div className="relative mt-2 w-0.5 grow rounded-full bg-slate-300 dark:bg-neutral-800" />
+                </Link>
+              ) : (
+                <Button
+                  onClick={handleOpenPreviewProfile}
+                  className="m-0 flex w-fit items-center border-none bg-transparent p-0 text-inherit shadow-none outline-none hover:bg-transparent focus:outline-none active:bg-transparent"
+                >
+                  <div className="relative size-11 cursor-pointer overflow-hidden">
+                    {data.postedBy.profilePic && (
+                      <Avatar>
+                        <AvatarImage
+                          sizes=""
+                          src={
+                            data.postedBy.profilePic ??
+                            "https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png"
+                          }
+                          alt="avatar"
+                        />
+                        <AvatarFallback>
+                          <AvatarImage
+                            sizes="96"
+                            src="https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png"
+                            alt="avatar"
+                          />
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                  <div className="relative mt-2 w-0.5 grow rounded-full bg-slate-300 dark:bg-neutral-800" />
+                </Button>
+              )}
+            </div>
 
-                <button className="flex items-center rounded-full px-2 py-1 hover:bg-[#e1e1e1]">
-                  <MessageCircleIcon className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
-                  <span className="ml-1 text-sm text-light-4">
-                    {data?.commentCount}
+            <div className="flex w-full flex-col">
+              <div className="flex w-full items-center justify-between">
+                <Link
+                  href={
+                    isProfilePage
+                      ? `/thread/${data._id}`
+                      : `/profile/${data.postedBy._id}`
+                  }
+                  className="flex w-fit items-center"
+                >
+                  <h4 className="cursor-pointer text-2xl font-semibold dark:text-light-1">
+                    {data?.postedBy?.name}
+                  </h4>
+                  <span className="ml-3 text-xs text-dark-4">
+                    {formatDateString(data?.createdAt)}
                   </span>
-                </button>
-                <button className="flex items-center rounded-full px-2 py-1 hover:bg-[#e1e1e1]">
-                  <Repeat2 className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
-                  <span className="ml-1 text-sm text-light-4">
-                    {data?.repostCount}
-                  </span>
-                </button>
+                </Link>
                 <Menubar>
                   <MenubarMenu>
                     <MenubarTrigger className="flex items-center rounded-full p-2 transition-all duration-150 hover:bg-[#e1e1e1] active:scale-95 data-[state=open]:bg-[#e1e1e1]">
-                      <Share1Icon className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
+                      <GripIcon className="size-6 cursor-pointer " />
                     </MenubarTrigger>
                     <MenubarContent align="end">
-                      <MenubarItem
-                        onClick={() => copyLink(threadUrl)}
-                        className="cursor-default py-2"
-                      >
-                        Copy Link
+                      <MenubarItem className="flex cursor-default items-center justify-between py-2">
+                        Save<MenubarShortcut>⌘CTRL + S</MenubarShortcut>
                       </MenubarItem>
+                      {isOwnerThread && (
+                        <>
+                          <MenubarItem className="flex cursor-default items-center justify-between py-2">
+                            Delete
+                            <Trash2Icon className="size-4 cursor-pointer " />
+                          </MenubarItem>
+                          <MenubarSeparator />
+                          {/* <MenubarItem className="flex cursor-default items-center justify-between py-2">
+                          Mute
+                          <BellMinusIcon className="size-4 cursor-pointer " />
+                        </MenubarItem>
+                        <MenubarItem className="flex cursor-default items-center justify-between py-2">
+                          Block
+                          <ListXIcon className="size-4 cursor-pointer" />
+                        </MenubarItem>
+                        <MenubarItem className="flex cursor-default items-center justify-between py-2">
+                          Report
+                          <FlagTriangleRightIcon className="size-4 cursor-pointer" />
+                        </MenubarItem> */}
+                        </>
+                      )}
+                      {!isOwnerThread && (
+                        <>
+                          <MenubarItem className="flex cursor-default items-center justify-between py-2">
+                            Not interested
+                            <BellOffIcon className="size-4 cursor-pointer " />
+                          </MenubarItem>
+                          <MenubarSeparator />
+                          <MenubarItem className="flex cursor-default items-center justify-between py-2">
+                            Mute
+                            <BellMinusIcon className="size-4 cursor-pointer " />
+                          </MenubarItem>
+                          <MenubarItem className="flex cursor-default items-center justify-between py-2">
+                            Block
+                            <ListXIcon className="size-4 cursor-pointer" />
+                          </MenubarItem>
+                          <MenubarItem
+                            onClick={handleReport}
+                            className="flex cursor-default items-center justify-between py-2"
+                          >
+                            Report
+                            <FlagTriangleRightIcon className="size-4 cursor-pointer" />
+                          </MenubarItem>
+                        </>
+                      )}
                       <MenubarSeparator />
                       <MenubarItem
-                        onClick={() => copyLink(quoteThread)}
-                        className="cursor-default py-2"
+                        onClick={() => copyLink(threadUrl ?? "")}
+                        className="flex cursor-default items-center justify-between py-2"
                       >
-                        Get embed code
+                        Copy link
+                        <LinkIcon className="size-4 cursor-pointer" />
                       </MenubarItem>
                     </MenubarContent>
                   </MenubarMenu>
                 </Menubar>
               </div>
+              <Link href={`/thread/${data._id}`}>
+                <p className="mt-2 pb-3 text-sm dark:text-light-2 ">
+                  {data?.text}
+                </p>
+              </Link>
+              {data?.media?.length > 0 &&
+                (displayType === 1 ? (
+                  <Carousel images={data.media} />
+                ) : (
+                  <Carousel2 images={data.media} />
+                ))}
+              <div className={`mt-5 flex flex-col gap-3`}>
+                <div className="flex gap-3.5">
+                  <button
+                    onClick={() => handlerLike()}
+                    className="flex items-center rounded-full px-2 py-1 transition-all duration-150 hover:bg-[#e1e1e1] active:scale-95"
+                  >
+                    {isLiked ? (
+                      <HeartFilledIcon className="mr-px mt-px size-6 cursor-pointer object-contain text-red-600" />
+                    ) : (
+                      <HeartIcon className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
+                    )}
+                    <span className="ml-1 text-sm text-light-4">
+                      {likeCount}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={handleComment}
+                    className="flex items-center rounded-full px-2 py-1 hover:bg-[#e1e1e1]"
+                  >
+                    <MessageCircleIcon className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
+                    <span className="ml-1 text-sm text-light-4">
+                      {data?.commentCount}
+                    </span>
+                  </button>
+                  <button className="flex items-center rounded-full px-2 py-1 hover:bg-[#e1e1e1]">
+                    <Repeat2 className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
+                    <span className="ml-1 text-sm text-light-4">
+                      {data?.repostCount}
+                    </span>
+                  </button>
+                  <Menubar>
+                    <MenubarMenu>
+                      <MenubarTrigger className="flex items-center rounded-full p-2 transition-all duration-150 hover:bg-[#e1e1e1] active:scale-95 data-[state=open]:bg-[#e1e1e1]">
+                        <Share1Icon className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
+                      </MenubarTrigger>
+                      <MenubarContent align="end">
+                        <MenubarItem
+                          onClick={() => copyLink(threadUrl ?? "")}
+                          className="cursor-default py-2"
+                        >
+                          Copy Link
+                        </MenubarItem>
+                        <MenubarSeparator />
+                        <MenubarItem
+                          onClick={() => copyLink(quoteThread)}
+                          className="cursor-default py-2"
+                        >
+                          Get embed code
+                        </MenubarItem>
+                      </MenubarContent>
+                    </MenubarMenu>
+                  </Menubar>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </article>
+      </article>
+      <UserPreviewCard data={data.postedBy} />
+    </>
   );
 }
+type UserPreviewCardProps = {
+  _id: string;
+  name: string;
+  username: string;
+  profilePic: string;
+  bio: string;
+  isFollowed: boolean;
+  followerCount: number;
+};
+function UserPreviewCard({ data }: { data: UserPreviewCardProps }) {
+  const { isPreviewProfileCardOpened, toggleTrigger } = useTriggerStore();
+  const route = useRouter();
 
-export default ThreadCard;
+  const handleOpenChange = () => {
+    toggleTrigger("isPreviewProfileCardOpened");
+  };
+  const [isFollowing, setIsFollowing] = useState(data.isFollowed);
+
+  const handleFollowToggle = () => {
+    setIsFollowing((prev) => !prev);
+  };
+
+  return (
+    <Dialog open={isPreviewProfileCardOpened} onOpenChange={handleOpenChange}>
+      <DialogTrigger />
+      <DialogContent className="rounded-lg bg-white p-6 text-black">
+        {/* <DialogHeader className="text-center text-xl font-semibold">
+            User Profile
+          </DialogHeader> */}
+        <DialogContent>
+          <div className="flex flex-col items-center space-y-4">
+            <Button
+              className="border-none bg-transparent text-black hover:border-none hover:bg-transparent focus:outline-none active:bg-transparent"
+              onClick={() => {
+                toggleTrigger("isPreviewProfileCardOpened");
+                route.push(`./profile/${data._id}`);
+              }}
+            >
+              <Avatar className="size-24">
+                <AvatarImage
+                  className="size-32 rounded-full border-2 border-gray-300"
+                  src={data.profilePic}
+                  alt="avatar"
+                />
+                <AvatarFallback>
+                  <AvatarImage
+                    className="size-32 rounded-full border-2 border-gray-300"
+                    src="https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png"
+                    alt="avatar"
+                  />
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-lg font-medium">{data.name}</div>
+            </Button>
+
+            <div className="text-sm text-gray-500">@{data.username}</div>
+            <div className="text-sm text-gray-500">{data.bio}</div>
+
+            <div className="text-sm text-gray-700">
+              {data.followerCount ?? 0} Followers
+            </div>
+            <Button
+              onClick={handleFollowToggle}
+              className={`mt-4 ${isFollowing ? "bg-gray-500" : "bg-black"} text-white`}
+            >
+              {isFollowing ? "Unfollow" : "Follow"}
+            </Button>
+          </div>
+        </DialogContent>
+      </DialogContent>
+    </Dialog>
+  );
+}

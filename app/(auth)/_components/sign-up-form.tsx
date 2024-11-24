@@ -2,7 +2,10 @@
 import { HTMLAttributes, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconBrandFacebook, IconBrandGithub } from "@tabler/icons-react";
+import {
+  IconBrandFacebook,
+  IconBrandInstagram,
+} from "@tabler/icons-react";
 import { z } from "zod";
 import {
   Form,
@@ -151,16 +154,14 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
                 variant="outline"
                 className="w-full"
                 type="button"
-                loading={isLoading}
-                leftSection={<IconBrandGithub className="size-4" />}
+                leftSection={<IconBrandInstagram className="size-4" />}
               >
-                GitHub
+                Instagram
               </Button>
               <Button
                 variant="outline"
                 className="w-full"
                 type="button"
-                loading={isLoading}
                 leftSection={<IconBrandFacebook className="size-4" />}
               >
                 Facebook

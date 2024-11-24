@@ -8,6 +8,7 @@ import Topbar from "@/components/shared/Topbar";
 import useUserStore from "@/store/useUserStore";
 import { CreateThreadCard } from "@/components/cards/CreateThreadCard";
 import { Toaster } from "@/components/ui/toaster";
+import ReportThreadCard from "@/components/cards/ReportCard";
 
 export const metadata: Metadata = {
   title: "Threads",
@@ -32,6 +33,7 @@ export default function RootLayout({
         </section>
         <RightSidebar />
         <CreateThreadCard />
+        <ReportThreadCard />
         <Toaster />
       </main>
       <Bottombar />

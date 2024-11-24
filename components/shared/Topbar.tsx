@@ -1,11 +1,11 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import {
   Flag,
   LinkIcon,
   Slack as Logo,
   LogOut,
+  LogOutIcon,
   Save,
   Settings,
   UserMinus,
@@ -14,7 +14,7 @@ import {
 import useTriggerStore from "@/store/useTriggerStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import useUserStore from "@/store/useUserStore";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Menubar,
   MenubarContent,
@@ -24,41 +24,62 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "../ui/menubar";
+import { useMutation } from "react-query";
+import { logoutUser } from "@/apis/user";
+import { toast } from "../ui/use-toast";
 function Topbar() {
   const { LeftSidebarOpened } = useTriggerStore();
   const avatarUrl = useUserStore((state) => state.user?.profilePic);
   const pathname = usePathname();
   const isProfilePage = pathname.includes("/profile");
-
+  const router = useRouter();
+  const { mutate: mutatelogout } = useMutation({
+    mutationFn: logoutUser,
+    onSuccess: (data) => {
+      if (data.success) {
+        router.push("./sign-in");
+        toast({
+          title: "Logout Success",
+        });
+      }
+    },
+    onError: (error: any) => {
+      console.error("Error updating user:", error);
+      const errMessage =
+        error?.response?.data?.error || "Server error, please try again later";
+      errMessage(errMessage); // Set error message from API
+    },
+  });
   return (
     <nav className="fixed top-0 z-30 flex w-full items-center justify-between bg-light-1 px-8 py-5 shadow-xl dark:bg-dark-2 lg:bg-transparent lg:shadow-none">
       <Link href="/" className="flex items-center gap-4">
-        <Logo className="relative m-auto size-10" />
+        <Logo className="relative m-auto size-9" />
         {LeftSidebarOpened && (
           <p className="text-3xl font-semibold dark:text-light-1 max-xs:hidden">
-            Threads
+            Thread City
           </p>
         )}
       </Link>
 
       <div className="flex items-center gap-1">
         <div className="block md:hidden">
-          <div className="flex cursor-pointer">
-            <Image
-              src="/assets/logout.svg"
-              alt="logout"
-              width={24}
-              height={24}
-            />
+          <div onClick={() => mutatelogout()} className="flex cursor-pointer">
+            <LogOutIcon className="size-6" />
           </div>
         </div>
         {!isProfilePage && (
           <Menubar>
             <MenubarMenu>
-              <MenubarTrigger className="flex items-center rounded-full p-2 transition-all duration-150 hover:border-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-white active:scale-95 data-[state=open]:border-[#e1e1e1]">
+              <MenubarTrigger className="flex items-center border-none bg-transparent p-2 transition-all duration-150 hover:border-[#e1e1e1] focus:outline-none focus:ring-2 focus:ring-white active:scale-95 data-[state=open]:border-[#e1e1e1]">
                 <Avatar>
                   <AvatarImage src={avatarUrl} />
-                  <AvatarFallback>Avatar</AvatarFallback>
+                  <AvatarFallback>
+                    <AvatarImage
+                      src={
+                        "https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png"
+                      }
+                    />
+                  </AvatarFallback>
                 </Avatar>
               </MenubarTrigger>
               <MenubarContent align="end">
@@ -87,11 +108,12 @@ function Topbar() {
 
                 <MenubarSeparator />
 
-                <MenubarItem className="flex cursor-default items-center justify-between py-2">
-                  Settings
-                  <Settings className="ml-2 size-4  cursor-pointer" />
-                </MenubarItem>
-
+                <Link href={"./settings/profile"}>
+                  <MenubarItem className="flex cursor-default items-center justify-between py-2">
+                    Settings
+                    <Settings className="ml-2 size-4  cursor-pointer" />
+                  </MenubarItem>
+                </Link>
                 <MenubarItem className="flex cursor-default items-center justify-between py-2">
                   Log out
                   <LogOut className="ml-2 size-4  cursor-pointer" />

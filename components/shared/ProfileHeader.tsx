@@ -1,8 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { User } from "@/types/userType";
+import useUserStore from "@/store/useUserStore";
+import { Edit2Icon, UserPlus } from "lucide-react";
+import { Button } from "../custom/button";
 
 function ProfileHeader({ data }: Readonly<{ data: User }>) {
+  const currentUser = useUserStore((state) => state.user);
+  const isOwnerProfile = currentUser?._id === data._id;
+
   return (
     <div className="flex w-full flex-col justify-start rounded-xl border bg-light-1 px-4 py-5 shadow-md">
       <div className="flex items-center justify-between">
@@ -21,12 +27,19 @@ function ProfileHeader({ data }: Readonly<{ data: User }>) {
             <p className="dark:text-gray-1">@{data.username}</p>
           </div>
         </div>
-        <Link href="/settings/profile">
-          <div className="flex cursor-pointer gap-3 rounded-lg bg-dark-3 px-4 py-2">
-            <Image src="/assets/edit.svg" alt="logout" width={16} height={16} />
-            <p className="text-light-2  max-sm:hidden">Edit</p>
-          </div>
-        </Link>
+        {isOwnerProfile ? (
+          <Link href="/settings/profile">
+            <div className="flex items-center cursor-pointer gap-5 rounded-lg bg-dark-3 px-4 py-3">
+              <Edit2Icon className="size-4 text-white" />
+              <p className="text-light-2  max-sm:hidden">Edit</p>
+            </div>
+          </Link>
+        ) : (
+          <Button className="flex  items-center cursor-pointer gap-2 rounded-lg bg-dark-3 px-4 py-3">
+            <UserPlus className="size-5" />
+            <p className="text-light-2  max-sm:hidden">Follow</p>
+          </Button>
+        )}
       </div>
 
       <p className="mt-6 max-w-lg dark:text-light-2">{data.bio}</p>

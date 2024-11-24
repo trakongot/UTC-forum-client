@@ -67,18 +67,60 @@ export const getThreadsByUser = async ({
 };
 export const createThread = async ({
   text,
-  imgs,
+  media,
 }: {
   text: string;
-  imgs?: File;
+  media?: File[];
 }): Promise<{ user: Thread }> => {
   const formData = new FormData();
   formData.append("text", text);
-  if (imgs) formData.append("imgs", imgs);
-
+  if (media) media.forEach((item) => formData.append("media", item));
   const response = await axiosClient.post(`/threads`, formData);
   if (response.data.error) {
     throw new Error(response.data.error);
   }
   return response.data as { user: Thread };
+};
+export const relyThread = async ({
+  text,
+  media,
+  parentId,
+}: {
+  text: string;
+  media?: File[];
+  parentId: string;
+}): Promise<{ user: Thread }> => {
+  const formData = new FormData();
+  formData.append("text", text);
+  if (media) media.forEach((item) => formData.append("media", item));
+  const response = await axiosClient.post(
+    `/threads/${parentId}/replies`,
+    formData
+  );
+  if (response.data.error) {
+    throw new Error(response.data.error);
+  }
+  return response.data as { user: Thread };
+};
+export const likeOrUnlikeThread = async ({
+  id,
+}: {
+  id: string;
+}): Promise<{
+  success: boolean;
+  message: string;
+  likeCount: number;
+}> => {
+  if (!id) {
+    throw new Error("Thread ID is required");
+  }
+  const response = await axiosClient.post(`/threads/${id}/like`);
+  if (response.data.error) {
+    throw new Error(response.data.error);
+  }
+  return response.data as {
+    success: boolean;
+    message: string;
+    likeCount: number;
+  };
 };

@@ -29,6 +29,7 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [threads, setThreads] = useState<any[]>([]);
   const loaderRef = useRef<HTMLDivElement>(null);
+
   const { data: userData } = useQuery({
     queryKey: ["user", profileId],
     queryFn: () => getUserById({ id: profileId }),
@@ -37,6 +38,7 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
     },
     enabled: !!profileId,
   });
+
   const { data: threadsData, isLoading: isLoadingThreadsData } = useQuery({
     queryKey: ["threadsById", profileId, pageNumber],
     queryFn: () => getThreadsByUser({ id: profileId, pageNumber, pageSize }),
@@ -71,7 +73,7 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
   if (currentUser?.onboarded === false) {
     router.push("/onboarding");
   }
-  if (!userData) return <>ko tìm thấy user</>;
+  if (!userData) return <>loading...</>;
   return (
     <section>
       <ProfileHeader data={userData} />

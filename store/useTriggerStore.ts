@@ -3,6 +3,8 @@ import { create } from "zustand";
 interface TriggerState {
   LeftSidebarOpened: boolean;
   isCreateThreadCardOpened: boolean;
+  isReportCardOpened: boolean;
+  isPreviewProfileCardOpened: boolean;
   //   setTrigger: (
   //     triggerName: keyof Omit<TriggerState, "setTrigger" | "toggleTrigger">,
   //     value: boolean
@@ -12,9 +14,12 @@ interface TriggerState {
   ) => void;
 }
 
-const useTriggerStore = create<TriggerState>((set, get) => ({
-  LeftSidebarOpened: false,
+const useTriggerStore = create<TriggerState>((set) => ({
+  LeftSidebarOpened: true,
   isCreateThreadCardOpened: false,
+  isReportCardOpened: false,
+  isPreviewProfileCardOpened: false,
+
   //   setTrigger: (triggerName, value) =>
   //     set((state) => ({ ...state, [triggerName]: value })),
 

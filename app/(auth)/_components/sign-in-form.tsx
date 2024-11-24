@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconBrandFacebook, IconBrandGithub } from "@tabler/icons-react";
+import { IconBrandFacebook, IconBrandInstagram } from "@tabler/icons-react";
 import {
   Form,
   FormControl,
@@ -16,7 +16,7 @@ import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { HTMLAttributes, useEffect, useState } from "react";
+import { HTMLAttributes, useState } from "react";
 import useUserStore from "@/store/useUserStore";
 import { useMutation } from "react-query";
 import { signinUser } from "@/apis/auth";
@@ -145,16 +145,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 variant="outline"
                 className="w-full"
                 type="button"
-                loading={isLoading}
-                leftSection={<IconBrandGithub className="size-4" />}
+                leftSection={<IconBrandInstagram className="size-4" />}
               >
-                GitHub
+                Instagram
               </Button>
               <Button
                 variant="outline"
                 className="w-full"
                 type="button"
-                loading={isLoading}
                 leftSection={<IconBrandFacebook className="size-4" />}
               >
                 Facebook

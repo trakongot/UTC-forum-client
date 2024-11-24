@@ -1,12 +1,16 @@
 export type Thread = {
   _id: string;
   postedBy: {
-    name: string;
-    profilePic: string;
     _id: string;
+    name: string;
+    username: string;
+    profilePic: string;
+    bio: string;
+    isFollowed: boolean;
+    followerCount: number;
   };
   text: string;
-  imgs: string[];
+  media: string[];
   likeCount: number;
   commentCount: number;
   shareCount: number;
@@ -16,5 +20,5 @@ export type Thread = {
   createdAt: string;
   isFollowed?: boolean;
   likes: [string];
-  isliked: boolean;
+  isLiked: boolean;
 };

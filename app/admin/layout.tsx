@@ -64,7 +64,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </SidebarGroup>
         </SidebarContent>
       </Sidebar>
-      <main>
+      <main className="h-full w-screen">
         <SidebarTrigger />
         {children}
       </main>

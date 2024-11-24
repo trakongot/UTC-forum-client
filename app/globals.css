@@ -80,9 +80,11 @@
   }
 
   .no-result {
-    @apply text-center text-light-1;
+    @apply text-center text-dark-1 dark:text-light-1;
   }
-
+  .btn-transparent {
+    @apply bg-transparent border-none p-0 m-0 outline-none shadow-none text-inherit focus:outline-none hover:bg-transparent active:bg-transparent;
+  }
   .no-focus {
     @apply focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 !important;
   }

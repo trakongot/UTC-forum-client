@@ -25,8 +25,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 // import Link from "next/link";
 import useUserStore from "@/store/useUserStore";
-import Image from "next/image";
 import { ChangeEvent, useState } from "react";
+import { updateUser } from "@/apis/user";
+import { useMutation } from "react-query";
+import { useRouter } from "next/navigation";
+import { ToastAction } from "@/components/ui/toast";
+import { toast } from "@/components/ui/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const profileFormSchema = z.object({
   username: z
@@ -63,11 +68,13 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 // This can come from your database or API.
 
 export default function ProfileForm() {
-  const { user } = useUserStore();
-  const [imagePreview, setImagePreview] = useState<string | null>(null); // URL tạm thời cho ảnh
+  const { user, setUser } = useUserStore();
+  const [imagePreview, setImagePreview] = useState<string | null | undefined>(
+    user?.profilePic
+  ); // URL tạm thời cho ảnh
   const [file, setFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  const router = useRouter();
   const defaultValues: Partial<ProfileFormValues> = {
     bio: user?.bio ?? "",
     username: user?.username ?? "",
@@ -86,16 +93,36 @@ export default function ProfileForm() {
     defaultValues,
     mode: "onChange",
   });
-  function onSubmit(data: ProfileFormValues) {
-    if (!file) {
-      setErrorMessage("Please upload a profile photo.");
-      return;
+  const { isLoading, mutate } = useMutation(updateUser, {
+    onSuccess: (data) => {
+      setUser(data);
+      toast({
+        title: "Update Success",
+        action: <ToastAction altText="undo">Undo</ToastAction>,
+      });
+      router.push(`/profile/${user?._id}`);
+    },
+    onError: (error: any) => {
+      console.error("Error updating user:", error);
+      const errMessage =
+        error?.response?.data?.error || "Server error, please try again later";
+      setErrorMessage(errMessage);
+    },
+  });
+  function onSubmit(values: ProfileFormValues) {
+    if (file) {
+      const validImageTypes = ["image/png", "image/jpeg", "image/jpg"];
+      if (!validImageTypes.includes(file.type)) {
+        setErrorMessage("Please upload a valid image (PNG, JPEG, JPG).");
+        return;
+      }
     }
-    if (!["image/png", "image/jpeg"].includes(file.type)) {
-      setErrorMessage("Please upload a valid image (PNG, JPEG).");
-      return;
-    }
-    console.log(data);
+    mutate({
+      username: values.username,
+      name: values.name,
+      bio: values.bio,
+      img: file,
+    });
   }
   const handleImage = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -114,23 +141,16 @@ export default function ProfileForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormItem className="flex items-center gap-4">
           <FormLabel>
-            {imagePreview ? (
-              <Image
-                src={imagePreview}
-                alt="profile_icon"
-                priority
-                width={96}
-                height={96}
-                className="rounded-full"
-              />
-            ) : (
-              <Image
-                src="/assets/profile.svg"
-                alt="profile_icon"
-                width={24}
-                height={24}
-                className="rounded-full object-contain"
-              />
+            {imagePreview && (
+              <Avatar className="size-24">
+                <AvatarImage src={imagePreview} alt="avatar" />
+                <AvatarFallback>
+                  <AvatarImage
+                    src="https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png"
+                    alt="avatar"
+                  />
+                </AvatarFallback>
+              </Avatar>
             )}
           </FormLabel>
           <FormControl className="flex-1 font-semibold">
@@ -244,7 +264,9 @@ export default function ProfileForm() {
             {errorMessage}
           </p>
         )}
-        <Button type="submit">Update profile</Button>
+        <Button loading={isLoading} type="submit">
+          Update profile
+        </Button>
       </form>
     </Form>
   );
