@@ -82,3 +82,26 @@ export const createThread = async ({
   }
   return response.data as { user: Thread };
 };
+
+
+
+
+export const likeOrUnlikeThread = async ({
+  id,
+}: { id: string }): Promise<{ message: string }> => {
+  try {
+    // Gửi yêu cầu API follow/unfollow thread
+    const response = await axiosClient.post(`/threads/${id}/like`);
+
+    // Kiểm tra xem API có trả lỗi hay không
+    if (response.data.error) {
+      throw new Error(response.data.error);
+    }
+
+    // Trả về dữ liệu thread
+    return response.data as { message: string };
+  } catch (error) {
+    console.error("Error in followOrUnfollowThread:", error);
+    throw error;
+  }
+};

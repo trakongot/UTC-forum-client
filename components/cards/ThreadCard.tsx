@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Carousel from "../custom/carousel";
 import Carousel2 from "../custom/carousel2";
 import {
@@ -25,6 +25,10 @@ import {
 } from "lucide-react";
 import { Thread } from "@/types/threadType";
 import { copyLink, formatDateString } from "@/lib/utils";
+import { Button } from "../ui/button";
+import { FollowContext } from "@/Context/Context";
+import { useMutation } from "react-query";
+import { likeOrUnlikeThread } from "@/apis/threads";
 type Props = {
   data: Thread;
   displayType?: 1 | 2;
@@ -37,11 +41,27 @@ export function ThreadCard({
   className,
   threadUrl,
 }: Readonly<Props>) {
-  const [isLiked, setIsLiked] = useState(data.isliked);
+    const [isLiked, setIsLiked] = useState(data.isLiked);
+    const [likeCount, setlikeCount] = useState(data.likeCount);
+    console.log(isLiked,"islike")
 
-  const toggleLike = () => {
+  const { mutate: likeorunlikeThread } = useMutation({
+    mutationFn: likeOrUnlikeThread,
+    onSuccess: (data: { message: string }) => {
+      console.log("Like/Unlike success:", data);
+    },
+    onError: (error: any) => {
+      console.error("Error updating user:", error);
+    },
+  });
+  const toggleLike = (id :string) => {
+    isLiked ? setlikeCount((prevLikeCount) => prevLikeCount-1) : setlikeCount((prevLikeCount) => prevLikeCount+1);
     setIsLiked((prevIsLiked) => !prevIsLiked);
+    likeorunlikeThread({id});         
   };
+  const {handleFollow ,followStatus } = useContext(FollowContext) ;
+  const isFollowed = followStatus[data.postedBy._id] ?? data.isFollowed;
+  console.log(followStatus[data.postedBy._id], isFollowed,"hihihihihihihihihih")
   const quoteThread = `<blockquote class="text-post-media" data-text-post-permalink="${threadUrl}" id="ig-tp-DCYbxucSdAf" style="background:#FFF; border-width: 1px; border-style: solid; border-color: #00000026; border-radius: 16px; max-width:540px; margin: 1px; min-width:270px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);">
       <a href="${threadUrl}" style="background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif;" target="_blank">
         <div style="padding: 40px; display: flex; flex-direction: column; align-items: center;">
@@ -92,10 +112,14 @@ export function ThreadCard({
                 <h4 className="cursor-pointer text-2xl font-semibold dark:text-light-1">
                   {data?.postedBy?.name}
                 </h4>
-                <span className="ml-3 text-xs text-dark-4">
+              </Link>
+              <Button style={{ marginLeft: "-150px" }} 
+               onClick={() => handleFollow(data.postedBy._id, followStatus[data.postedBy._id] || data.isFollowed)} >
+                  {isFollowed ? "Unfollow" : "Follow"}</Button>
+
+                  <span style={{ marginLeft: "-150px" }} className="ml-3 text-xs text-dark-4" >
                   {formatDateString(data?.createdAt)}
                 </span>
-              </Link>
               <Menubar>
                 <MenubarMenu>
                   <MenubarTrigger className="flex items-center rounded-full p-2 transition-all duration-150 hover:bg-[#e1e1e1] active:scale-95 data-[state=open]:bg-[#e1e1e1]">
@@ -148,7 +172,7 @@ export function ThreadCard({
             <div className={`mt-5 flex flex-col gap-3`}>
               <div className="flex gap-3.5">
                 <button
-                  onClick={toggleLike}
+                  onClick={ ()=>toggleLike(data._id)}
                   className="flex items-center rounded-full px-2 py-1 transition-all duration-150 hover:bg-[#e1e1e1] active:scale-95"
                 >
                   {isLiked ? (
@@ -157,7 +181,7 @@ export function ThreadCard({
                     <HeartIcon className="mr-px mt-px size-6 cursor-pointer object-contain text-light-4" />
                   )}
                   <span className="ml-1 text-sm text-light-4">
-                    {data?.likeCount}
+                    {likeCount}
                   </span>
                 </button>
 

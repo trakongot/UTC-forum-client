@@ -16,5 +16,5 @@ export type Thread = {
   createdAt: string;
   isFollowed?: boolean;
   likes: [string];
-  isliked: boolean;
+  isLiked: boolean;
 };

@@ -43,7 +43,7 @@ export default function Home({
       },
     }
   );
-
+  console.log(threads);
   // Infinite scroll handler with throttle
   useEffect(() => {
     const handleScroll = throttle(() => {
