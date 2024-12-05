@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-
 import { Button } from "../ui/button";
 
 interface Props {
@@ -50,7 +49,7 @@ function UserCard({ id, name, username, imgUrl, personType }: Readonly<Props>) {
           }
         }}
       >
-        View
+        Xem trang cá nhân
       </Button>
     </article>
   );

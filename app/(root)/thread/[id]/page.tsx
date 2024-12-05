@@ -8,10 +8,15 @@ import { getRepliesThread, getThreadById } from "@/apis/threads";
 import ThreadCard from "@/components/cards/ThreadCard";
 import { throttle } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "@/components/ui/use-toast";
 
 export default function Page({ params }: { params: { id: string } }) {
   const router = useRouter();
   const currentUser = useUserStore((state) => state.user);
+  if(!currentUser) {
+    toast({title: 'vui lòng đăng nhập'})
+    router.push('/sign-in')
+  }
   const threadId = params.id;
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 3;
@@ -65,11 +70,11 @@ export default function Page({ params }: { params: { id: string } }) {
   }, [commentsData]);
 
   if (isLoadingThreadData || isLoadingCommentsData) {
-    return <p className="no-result">Loading...</p>;
+    return <p className="no-result">đang tải...</p>;
   }
 
   if (!threadData) {
-    return <p className="no-result">No thread found</p>;
+    return <p className="no-result">Rất tiếc, chúng tôi không tìm thấy nội dung bạn đang tìm kiếm. Có thể nội dung này đã bị xóa hoặc không tồn tại.</p>;
   }
   return (
     <section
@@ -92,7 +97,7 @@ export default function Page({ params }: { params: { id: string } }) {
             .fill(0)
             .map(() => <ThreadCardSekeleton key={uuidv4()} />)
         ) : comments.length === 0 ? (
-          <p className="no-result">No comments found</p>
+          <p className="no-result">Chưa có bình luận</p>
         ) : (
           comments.map((comment) => (
             <ThreadCard

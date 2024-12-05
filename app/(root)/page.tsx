@@ -66,9 +66,8 @@ export default function Home({
   return (
     <>
       <h1 className="head-text text-left text-2xl font-bold text-dark-1 dark:text-light-1">
-        Trending Threads
+        Được Quan Tâm Nhiều      
       </h1>
-
       <section
         ref={loaderRef}
         className="no-scrollbar mt-9 flex max-h-[80vh] flex-col gap-10 overflow-auto"
@@ -86,7 +85,7 @@ export default function Home({
               />
             ))}
         {!isLoading && threads.length === 0 && (
-          <p className="no-result">No threads found</p>
+          <p className="no-result">Sever đang bảo trì vui lòng thử lại sau</p>
         )}
 
         {isFetching && <ThreadCardSekeleton key={uuidv4()} />}

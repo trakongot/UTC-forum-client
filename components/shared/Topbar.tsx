@@ -25,11 +25,12 @@ import {
   MenubarTrigger,
 } from "../ui/menubar";
 import { useMutation } from "react-query";
-import { logoutUser } from "@/apis/user";
+import { logoutUser } from "@/apis/auth";
 import { toast } from "../ui/use-toast";
 function Topbar() {
   const { LeftSidebarOpened } = useTriggerStore();
   const avatarUrl = useUserStore((state) => state.user?.profilePic);
+  const logout = useUserStore((state) => state?.logout);
   const pathname = usePathname();
   const isProfilePage = pathname.includes("/profile");
   const router = useRouter();
@@ -37,6 +38,7 @@ function Topbar() {
     mutationFn: logoutUser,
     onSuccess: (data) => {
       if (data.success) {
+        logout()
         router.push("./sign-in");
         toast({
           title: "Logout Success",

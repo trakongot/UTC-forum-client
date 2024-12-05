@@ -1,10 +1,6 @@
 import axiosClient from "@/lib/userApi";
-import { Thread } from "@/types/threadType";
-type ThreadsListResponse = {
-  success: boolean;
-  threads: Thread[];
-  isNext: boolean;
-};
+import { Thread, ThreadsListResponse } from "@/types/threadType";
+
 export const getThreads = async ({
   pageNumber = 1,
   pageSize = 20,

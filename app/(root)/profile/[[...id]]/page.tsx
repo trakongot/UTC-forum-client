@@ -13,6 +13,7 @@ import ThreadCard from "@/components/cards/ThreadCard";
 import ThreadCardSekeleton from "@/components/cards/ThreadCardSekeleton";
 import { useEffect, useRef, useState } from "react";
 import { throttle } from "@/lib/utils";
+// import { toast } from "@/components/ui/use-toast";
 
 const profileTabs = [
   { value: "threads", label: "Threads", icon: "/assets/reply.svg" },
@@ -21,10 +22,15 @@ const profileTabs = [
 ];
 
 export default function Page({ params }: Readonly<{ params: { id: string } }>) {
-  const [pageNumber, setPageNumber] = useState(1);
   const router = useRouter();
-  const pageSize = 3;
   const currentUser = useUserStore((state) => state.user);
+  // if (!currentUser) {
+  //   toast({title: 'vui lòng đăng nhập'})
+  //   router.push("/sign-in");
+  // }
+
+  const [pageNumber, setPageNumber] = useState(1);
+  const pageSize = 3;
   const profileId = params.id;
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [threads, setThreads] = useState<any[]>([]);
@@ -34,7 +40,7 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
     queryKey: ["user", profileId],
     queryFn: () => getUserById({ id: profileId }),
     onError: (error) => {
-      console.error("Error fetching  data:", error);
+      console.error("Sever bảo trì vui lòng thử lại sau", error);
     },
     enabled: !!profileId,
   });
@@ -43,7 +49,7 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
     queryKey: ["threadsById", profileId, pageNumber],
     queryFn: () => getThreadsByUser({ id: profileId, pageNumber, pageSize }),
     onError: (error) => {
-      console.error("Error fetching  data:", error);
+      console.error("Sever bảo trì vui lòng thử lại sau", error);
     },
     enabled: !!profileId,
   });
@@ -128,7 +134,7 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
               .fill(0)
               .map(() => <ThreadCardSekeleton key={uuidv4()} />)
           ) : threads?.length === 0 ? (
-            <p className="no-result">No comments found</p>
+            <p className="no-result">Rất tiếc, chúng tôi không tìm thấy nội dung bạn đang tìm kiếm. Có thể nội dung này đã bị xóa hoặc không tồn tại.</p>
           ) : (
             threads?.map((thread) => (
               <ThreadCard

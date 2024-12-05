@@ -62,16 +62,5 @@ export const getUserByCookies = async (): Promise<User> => {
   }
   return response.data as User;
 };
-export const logoutUser = async (): Promise<{
-  success: boolean;
-  message: string;
-}> => {
-  const response = await axiosClient.post("/users/logout");
-  if (response.data.error) {
-    throw new Error(response.data.error);
-  }
-  return response.data as {
-    success: boolean;
-    message: string;
-  };
-};
+
+

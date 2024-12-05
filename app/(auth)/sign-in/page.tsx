@@ -41,7 +41,7 @@ export default function SignIn() {
               You don&apos;t have an account yet?{" "}
               <Link
                 className="underline underline-offset-4 hover:text-primary"
-                href={"./sign-up"}
+                href={"/sign-up"}
               >
                 Sign up here
               </Link>

@@ -11,19 +11,22 @@ import { IconChevronsLeft } from "@tabler/icons-react";
 import { LogOut } from "lucide-react";
 import useTriggerStore from "@/store/useTriggerStore";
 import { useMutation } from "react-query";
-import { logoutUser } from "@/apis/user";
+import { logoutUser } from "@/apis/auth";
 import { toast } from "../ui/use-toast";
 
 const LeftSidebar = () => {
   const pathname = usePathname();
   const { LeftSidebarOpened, toggleTrigger } = useTriggerStore();
   const userId = useUserStore((state) => state?.user?._id);
+  const logout = useUserStore((state) => state?.logout);
+
   const router = useRouter();
   const { mutate: mutatelogout } = useMutation({
     mutationFn: logoutUser,
     onSuccess: (data) => {
       if (data.success) {
-        router.push("./sign-in");
+        logout()
+        router.push("/sign-in");
         toast({
           title: "Logout Success",
         });

@@ -22,3 +22,8 @@ export type Thread = {
   likes: [string];
   isLiked: boolean;
 };
+export type ThreadsListResponse = {
+  success: boolean;
+  threads: Thread[];
+  isNext: boolean;
+};

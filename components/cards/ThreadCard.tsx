@@ -354,7 +354,7 @@ function UserPreviewCard({ data }: { data: UserPreviewCardProps }) {
         <DialogContent>
           <div className="flex flex-col items-center space-y-4">
             <Button
-              className="border-none bg-transparent text-black hover:border-none hover:bg-transparent focus:outline-none active:bg-transparent"
+              className="border-none bg-transparent shadow-none text-black hover:border-none hover:bg-transparent focus:outline-none active:bg-transparent"
               onClick={() => {
                 toggleTrigger("isPreviewProfileCardOpened");
                 route.push(`./profile/${data._id}`);
@@ -381,7 +381,7 @@ function UserPreviewCard({ data }: { data: UserPreviewCardProps }) {
             <div className="text-sm text-gray-500">{data.bio}</div>
 
             <div className="text-sm text-gray-700">
-              {data.followerCount ?? 0} Followers
+              {data.followerCount ?? 0} Người theo dõi
             </div>
             <Button
               onClick={handleFollowToggle}
