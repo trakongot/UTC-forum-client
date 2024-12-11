@@ -46,7 +46,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>UTC Admin</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-lg text-foreground">UTC Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {items.map((item) => (
@@ -64,7 +64,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </SidebarGroup>
         </SidebarContent>
       </Sidebar>
-      <main>
+
+      <main style={{ width: "80%" , padding:"10px" }}  >
         <SidebarTrigger />
         {children}
       </main>

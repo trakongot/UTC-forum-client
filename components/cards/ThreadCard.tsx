@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import Carousel from "../custom/carousel";
 import Carousel2 from "../custom/carousel2";
 import {
@@ -42,8 +42,8 @@ export function ThreadCard({
   threadUrl,
 }: Readonly<Props>) {
     const [isLiked, setIsLiked] = useState(data.isLiked);
+
     const [likeCount, setlikeCount] = useState(data.likeCount);
-    console.log(isLiked,"islike")
 
   const { mutate: likeorunlikeThread } = useMutation({
     mutationFn: likeOrUnlikeThread,
@@ -60,8 +60,15 @@ export function ThreadCard({
     likeorunlikeThread({id});         
   };
   const {handleFollow ,followStatus } = useContext(FollowContext) ;
-  const isFollowed = followStatus[data.postedBy._id] ?? data.isFollowed;
-  console.log(followStatus[data.postedBy._id], isFollowed,"hihihihihihihihihih")
+  const isFollowed = useMemo(
+    () => followStatus[data.postedBy._id.toString()] ?? data.isFollowed,
+    [followStatus, data.postedBy._id]
+  );
+  
+  console.log(isFollowed,"hehehe");
+  console.log(data,"hehehe2");
+  console.log(followStatus,"hehehe1");
+
   const quoteThread = `<blockquote class="text-post-media" data-text-post-permalink="${threadUrl}" id="ig-tp-DCYbxucSdAf" style="background:#FFF; border-width: 1px; border-style: solid; border-color: #00000026; border-radius: 16px; max-width:540px; margin: 1px; min-width:270px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);">
       <a href="${threadUrl}" style="background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif;" target="_blank">
         <div style="padding: 40px; display: flex; flex-direction: column; align-items: center;">
@@ -114,7 +121,7 @@ export function ThreadCard({
                 </h4>
               </Link>
               <Button style={{ marginLeft: "-150px" }} 
-               onClick={() => handleFollow(data.postedBy._id, followStatus[data.postedBy._id] || data.isFollowed)} >
+               onClick={() => handleFollow(data.postedBy._id.toString(), followStatus[data.postedBy._id] || data.isFollowed )} >
                   {isFollowed ? "Unfollow" : "Follow"}</Button>
 
                   <span style={{ marginLeft: "-150px" }} className="ml-3 text-xs text-dark-4" >

@@ -8,7 +8,6 @@ import { User } from "@/types/userType";
 interface FollowContextProps {
   handleFollow: (id: string,isFollowed : boolean) => void; 
   followStatus : any;
-  
 }
 
 
@@ -30,7 +29,7 @@ export const useFollow = () => {
 export const FollowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 
-  const [followStatus, setFollowStatus] = useState( {}); // Lưu trạng thái của từng người đăng bài
+  const [followStatus, setFollowStatus] = useState( []); // Lưu trạng thái của từng người đăng bài
  
   const { mutate: followingOrUnfollowingThread } = useMutation({
     mutationFn: followOrUnfollowUser,
@@ -45,11 +44,11 @@ export const FollowProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Hàm để follow hoặc unfollow
   const handleFollow = (id: string ,isFollowed:boolean) => {
+    console.log("Before Update:", followStatus[id], isFollowed); 
     setFollowStatus((prev) => ({
       ...prev,
-      [id]: isFollowed ? false : true,// Toggle trạng thái follow
+      [id]: prev[id] === undefined ? !isFollowed : !prev[id],// Toggle trạng thái follow
     }));
-    console.log(followStatus,"status");
     followingOrUnfollowingThread({ id });
   };
   return (

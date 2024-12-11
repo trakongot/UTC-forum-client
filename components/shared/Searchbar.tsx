@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
 
 import { Input } from "../ui/input";
 
@@ -12,20 +12,29 @@ interface Props {
 
 function Searchbar({ routeType }: Readonly<Props>) {
   const router = useRouter();
-  const [search, setSearch] = useState("");
+  const searchParams = useSearchParams(); // Lấy các tham số trong URL
+  const [search, setSearch] = useState(searchParams.get("q") || ""); // Lấy giá trị 'q' từ URL
+  const inputRef = useRef<HTMLInputElement>(null); // Tạo ref cho input
 
-  // query after 0.3s of no input
+  // Mỗi khi search thay đổi, cập nhật query params mà không reload trang
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (search) {
-        router.push(`/${routeType}?q=` + search);
+        router.push(`/${routeType}?q=${search}`, { shallow: true });
       } else {
-        router.push(`/${routeType}`);
+        router.push(`/${routeType}`, { shallow: true });
       }
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [search, routeType]);
+  }, [search, routeType, router]);
+
+  // Đảm bảo input có focus sau khi load xong
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [search]); // Khi search thay đổi, focus vào input
 
   return (
     <div className="flex gap-1 rounded-lg border bg-light-2 px-4 py-2 shadow-md dark:bg-dark-3">
@@ -38,6 +47,7 @@ function Searchbar({ routeType }: Readonly<Props>) {
       />
       <Input
         id="text"
+        ref={inputRef} // Gắn ref vào input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder={`${
