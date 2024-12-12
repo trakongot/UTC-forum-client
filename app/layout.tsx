@@ -1,6 +1,6 @@
-import React from "react";
-import "./globals.css";
-import ReactQueryProvider from "@/lib/provider/reactQuery";
+import ReactQueryProvider from '@/lib/provider/reactQuery';
+import React from 'react';
+import './globals.css';
 // import { Toaster } from "@/components/ui/toaster";
 
 export default function RootLayout({

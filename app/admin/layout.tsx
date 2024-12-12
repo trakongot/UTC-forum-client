@@ -1,4 +1,5 @@
-import { Calendar, Inbox, Search, Settings } from "lucide-react";
+'use client';
+import { Calendar, Inbox, Search, Settings } from 'lucide-react';
 
 import {
   Sidebar,
@@ -11,36 +12,38 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { DashboardIcon } from "@radix-ui/react-icons";
+} from '@/components/ui/sidebar';
+import { DashboardIcon } from '@radix-ui/react-icons';
+import { useInitializeUser } from '@/hooks/useInitializeUser';
 const items = [
   {
-    title: "Dashboard",
-    url: "#",
+    title: 'Dashboard',
+    url: '#',
     icon: DashboardIcon,
   },
   {
-    title: "Report",
-    url: "#",
+    title: 'Report',
+    url: '#',
     icon: Inbox,
   },
   {
-    title: "Calendar",
-    url: "#",
+    title: 'Calendar',
+    url: '#',
     icon: Calendar,
   },
   {
-    title: "Search",
-    url: "#",
+    title: 'Search',
+    url: '#',
     icon: Search,
   },
   {
-    title: "Settings",
-    url: "#",
+    title: 'Settings',
+    url: '#',
     icon: Settings,
   },
 ];
 export default function Layout({ children }: { children: React.ReactNode }) {
+  useInitializeUser();
   return (
     <SidebarProvider>
       <Sidebar>

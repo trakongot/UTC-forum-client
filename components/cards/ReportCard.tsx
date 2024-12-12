@@ -1,18 +1,19 @@
-import { useState } from "react";
-import { Button } from "../custom/button";
-import { Dialog, DialogTrigger } from "../ui/dialog";
-import { DialogContent, DialogFooter, DialogHeader } from "../custom/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
-import useTriggerStore from "@/store/useTriggerStore";
+'use client';
+import useTriggerStore from '@/store/useTriggerStore';
+import { useState } from 'react';
+import { Button } from '../custom/button';
+import { DialogContent, DialogFooter, DialogHeader } from '../custom/dialog';
+import { Dialog, DialogTrigger } from '../ui/dialog';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select';
+import { Textarea } from '../ui/textarea';
 
 export default function ReportThreadCard() {
   const { isReportCardOpened, toggleTrigger } = useTriggerStore();
-  const [reason, setReason] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
+  const [reason, setReason] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
   const handleOpenChange = () => {
-    toggleTrigger("isReportCardOpened");
+    toggleTrigger('isReportCardOpened');
   };
   const handleReportSubmit = () => {
     // console.log("Report submitted with reason:", reason);
@@ -30,7 +31,7 @@ export default function ReportThreadCard() {
         <div className="space-y-4">
           {/* Select reason for reporting */}
           <div className="my-3">
-            <Label className="block text-sm font-medium text-gray-700 mb-2">
+            <Label className="mb-2 block text-sm font-medium text-gray-700">
               Select a Reason for Reporting
             </Label>
             <Select
@@ -40,7 +41,7 @@ export default function ReportThreadCard() {
             >
               <SelectTrigger className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 ">
                 <span className="block truncate">
-                  {reason || "Choose a reason"}
+                  {reason || 'Choose a reason'}
                 </span>
               </SelectTrigger>
               <SelectContent>
@@ -65,7 +66,7 @@ export default function ReportThreadCard() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the violation"
-              className="mt-2 w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>

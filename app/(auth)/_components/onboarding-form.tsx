@@ -1,11 +1,14 @@
-"use client";
+'use client';
 
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { ChangeEvent, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { ChangeEvent, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
+import { updateUserOnboarded } from '@/apis/user';
+import { Button } from '@/components/custom/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Form,
   FormControl,
@@ -13,40 +16,37 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/custom/button";
-import { Textarea } from "@/components/ui/textarea";
-import { User } from "@/types/userType";
-import { useMutation } from "react-query";
-import { updateUserOnboarded } from "@/apis/user";
-import useUserStore from "@/store/useUserStore";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import useUserStore from '@/store/useUserStore';
+import { User } from '@/types/userType';
+import { useMutation } from 'react-query';
 
 const formSchema = z.object({
   name: z
     .string()
-    .min(3, { message: "Minimum 3 characters." })
-    .max(15, { message: "Maximum 15 characters." }),
+    .min(3, { message: 'Minimum 3 characters.' })
+    .max(15, { message: 'Maximum 15 characters.' }),
   username: z
     .string()
-    .min(3, { message: "Minimum 3 characters." })
-    .max(15, { message: "Maximum 14 characters." })
+    .min(3, { message: 'Minimum 3 characters.' })
+    .max(15, { message: 'Maximum 14 characters.' })
     .regex(/^[a-zA-Z0-9_]+$/, {
       message:
-        "Username must contain only letters, numbers, and underscores, and no spaces or special characters.",
+        'Username must contain only letters, numbers, and underscores, and no spaces or special characters.',
     }),
   bio: z
     .string()
-    .min(3, { message: "Minimum 3 characters." })
-    .max(1000, { message: "Maximum 1000 characters." }),
+    .min(3, { message: 'Minimum 3 characters.' })
+    .max(1000, { message: 'Maximum 1000 characters.' }),
 });
 
 export const OnboardingForm = () => {
   const router = useRouter();
-  const user = useUserStore((state) => state.user);
-  if (!user) router.push("./sign-in");
-  if (user?.onboarded) router.push("./");
+  const { user } = useUserStore();
+  if (!user) router.push('./sign-in');
+  if (user?.onboarded) router.push('./');
   const updateUser = useUserStore((state) => state.updateUser);
   const [file, setFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null); // URL tạm thời cho ảnh
@@ -56,12 +56,12 @@ export const OnboardingForm = () => {
     mutationFn: updateUserOnboarded,
     onSuccess: (data: { user: User }) => {
       updateUser(data.user);
-      router.push("./");
+      router.push('./');
     },
     onError: (error: any) => {
-      console.error("Error updating user:", error);
+      console.error('Error updating user:', error);
       const errMessage =
-        error?.response?.data?.error || "Server error, please try again later";
+        error?.response?.data?.error || 'Server error, please try again later';
       setErrorMessage(errMessage); // Set error message from API
     },
   });
@@ -69,19 +69,19 @@ export const OnboardingForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: user?.username ?? "",
-      username: user?.username ?? "",
-      bio: user?.bio ?? "",
+      name: user?.username ?? '',
+      username: user?.username ?? '',
+      bio: user?.bio ?? '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!file) {
-      setErrorMessage("Please upload a profile photo.");
+      setErrorMessage('Please upload a profile photo.');
       return;
     }
-    if (!["image/png", "image/jpeg"].includes(file.type)) {
-      setErrorMessage("Please upload a valid image (PNG, JPEG).");
+    if (!['image/png', 'image/jpeg'].includes(file.type)) {
+      setErrorMessage('Please upload a valid image (PNG, JPEG).');
       return;
     }
     // Trigger mutation with form data and image file
@@ -96,12 +96,12 @@ export const OnboardingForm = () => {
   const handleImage = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const selectedFile = e.target.files ? e.target.files[0] : null;
-    if (selectedFile?.type.includes("image")) {
+    if (selectedFile?.type.includes('image')) {
       setFile(selectedFile);
       const objectUrl = URL.createObjectURL(selectedFile);
       setImagePreview(objectUrl); // Tạo URL tạm thời để hiển thị ảnh
     } else {
-      setErrorMessage("Please select a valid image file.");
+      setErrorMessage('Please select a valid image file.');
     }
   };
 

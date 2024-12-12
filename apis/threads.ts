@@ -1,11 +1,11 @@
-import axiosClient from "@/lib/userApi";
-import { Thread, ThreadsListResponse } from "@/types/threadType";
+import axiosClient from '@/lib/userApi';
+import { Thread, ThreadsListResponse } from '@/types/threadType';
 
 export const getThreads = async ({
   pageNumber = 1,
   pageSize = 20,
 }): Promise<ThreadsListResponse> => {
-  const response = await axiosClient.get("/threads/", {
+  const response = await axiosClient.get('/threads/', {
     params: { pageNumber, pageSize },
   });
   if (response.data.error) {
@@ -22,7 +22,7 @@ export const getRepliesThread = async ({
   pageNumber?: number;
   pageSize?: number;
 }): Promise<ThreadsListResponse> => {
-  if (!id) throw new Error("Thread ID is required");
+  if (!id) throw new Error('Thread ID is required');
   const response = await axiosClient.get(`/threads/${id}/replies`, {
     params: { pageNumber, pageSize },
   });
@@ -36,7 +36,7 @@ export const getThreadById = async ({
 }: {
   id: string;
 }): Promise<Thread> => {
-  if (!id) throw new Error("Thread ID is required");
+  if (!id) throw new Error('Thread ID is required');
   const response = await axiosClient.get(`/threads/${id}`);
   if (response.data.error) {
     throw new Error(response.data.error);
@@ -52,7 +52,7 @@ export const getThreadsByUser = async ({
   pageNumber?: number;
   pageSize?: number;
 }): Promise<ThreadsListResponse> => {
-  if (!id) throw new Error("Thread ID is required");
+  if (!id) throw new Error('Thread ID is required');
   const response = await axiosClient.get(`/threads/${id}/byUser`, {
     params: { pageNumber, pageSize },
   });
@@ -69,8 +69,8 @@ export const createThread = async ({
   media?: File[];
 }): Promise<{ user: Thread }> => {
   const formData = new FormData();
-  formData.append("text", text);
-  if (media) media.forEach((item) => formData.append("media", item));
+  formData.append('text', text);
+  if (media) media.forEach((item) => formData.append('media', item));
   const response = await axiosClient.post(`/threads`, formData);
   if (response.data.error) {
     throw new Error(response.data.error);
@@ -87,11 +87,11 @@ export const relyThread = async ({
   parentId: string;
 }): Promise<{ user: Thread }> => {
   const formData = new FormData();
-  formData.append("text", text);
-  if (media) media.forEach((item) => formData.append("media", item));
+  formData.append('text', text);
+  if (media) media.forEach((item) => formData.append('media', item));
   const response = await axiosClient.post(
     `/threads/${parentId}/replies`,
-    formData
+    formData,
   );
   if (response.data.error) {
     throw new Error(response.data.error);
@@ -108,7 +108,7 @@ export const likeOrUnlikeThread = async ({
   likeCount: number;
 }> => {
   if (!id) {
-    throw new Error("Thread ID is required");
+    throw new Error('Thread ID is required');
   }
   const response = await axiosClient.post(`/threads/${id}/like`);
   if (response.data.error) {
@@ -118,5 +118,26 @@ export const likeOrUnlikeThread = async ({
     success: boolean;
     message: string;
     likeCount: number;
+  };
+};
+
+export const deleteThread = async ({
+  id,
+}: {
+  id: string;
+}): Promise<{
+  success: boolean;
+  message: string;
+}> => {
+  if (!id) {
+    throw new Error('Thread ID is required');
+  }
+  const response = await axiosClient.delete(`/threads/${id}`);
+  if (response.data.error) {
+    throw new Error(response.data.error);
+  }
+  return response.data as {
+    success: boolean;
+    message: string;
   };
 };

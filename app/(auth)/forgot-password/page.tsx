@@ -1,8 +1,16 @@
-import Link from "next/link";
-import { ForgotForm } from "../_components/forgot-form";
-import { Card } from "@/components/ui/card";
+'use client';
+
+import { Card } from '@/components/ui/card';
+import Link from 'next/link';
+import { useState } from 'react';
+import { ForgotForm } from '../_components/forgot-form';
 
 export default function ForgotPassword() {
+  const [isSentMail, setSentMail] = useState(false);
+
+  const handleSuccess = () => {
+    setSentMail(true);
+  };
   return (
     <div className="container grid h-svh flex-col items-center justify-center bg-primary-foreground lg:max-w-none lg:px-0">
       <div className="mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[480px] lg:p-8">
@@ -29,12 +37,18 @@ export default function ForgotPassword() {
               reset your password.
             </p>
           </div>
-          <ForgotForm />
+          <ForgotForm onSuccess={handleSuccess} />
 
-          <p className="text-sm mt-4 px-8 text-center text-muted-foreground">
+          {isSentMail && (
+            <p className=" mt-4 px-8 text-center text-sm">
+              A password reset link has been sent to your email address.
+            </p>
+          )}
+
+          <p className="mt-4 px-8 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?
             <Link
-              href={"/sign-up"}
+              href={'/sign-up'}
               className="ml-1 underline underline-offset-4 hover:text-primary"
             >
               Sign up

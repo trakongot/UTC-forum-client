@@ -1,7 +1,5 @@
-"use client";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/custom/button";
+'use client';
+import { Button } from '@/components/custom/button';
 import {
   Form,
   FormControl,
@@ -10,8 +8,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 // import {
 //   Select,
 //   SelectContent,
@@ -19,38 +19,38 @@ import { Input } from "@/components/ui/input";
 //   SelectTrigger,
 //   SelectValue,
 // } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea } from '@/components/ui/textarea';
 // import { toast } from "@/components/ui/use-toast";
 // import { cn } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod';
 // import Link from "next/link";
-import useUserStore from "@/store/useUserStore";
-import { ChangeEvent, useState } from "react";
-import { updateUser } from "@/apis/user";
-import { useMutation } from "react-query";
-import { useRouter } from "next/navigation";
-import { ToastAction } from "@/components/ui/toast";
-import { toast } from "@/components/ui/use-toast";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { updateUser } from '@/apis/user';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ToastAction } from '@/components/ui/toast';
+import { toast } from '@/components/ui/use-toast';
+import useUserStore from '@/store/useUserStore';
+import { useRouter } from 'next/navigation';
+import { ChangeEvent, useState } from 'react';
+import { useMutation } from 'react-query';
 
 const profileFormSchema = z.object({
   username: z
     .string()
     .min(2, {
-      message: "Username must be at least 2 characters.",
+      message: 'Username must be at least 2 characters.',
     })
     .max(30, {
-      message: "Username must not be longer than 30 characters.",
+      message: 'Username must not be longer than 30 characters.',
     }),
   name: z
     .string({
-      required_error: "Please select an email to display.",
+      required_error: 'Please select an email to display.',
     })
     .min(2, {
-      message: "Username must be at least 2 characters.",
+      message: 'Username must be at least 2 characters.',
     })
     .max(10, {
-      message: "Username must not be longer than 30 characters.",
+      message: 'Username must not be longer than 30 characters.',
     }),
 
   bio: z.string().max(160).min(4),
@@ -70,15 +70,15 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export default function ProfileForm() {
   const { user, setUser } = useUserStore();
   const [imagePreview, setImagePreview] = useState<string | null | undefined>(
-    user?.profilePic
+    user?.profilePic,
   ); // URL tạm thời cho ảnh
   const [file, setFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
   const defaultValues: Partial<ProfileFormValues> = {
-    bio: user?.bio ?? "",
-    username: user?.username ?? "",
-    name: user?.name ?? "",
+    bio: user?.bio ?? '',
+    username: user?.username ?? '',
+    name: user?.name ?? '',
     // urls: [
     //   { value: "https://shadcn.com" },
     //   { value: "http://twitter.com/shadcn" },
@@ -91,29 +91,31 @@ export default function ProfileForm() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
-    mode: "onChange",
+    mode: 'onChange',
   });
   const { isLoading, mutate } = useMutation(updateUser, {
     onSuccess: (data) => {
       setUser(data);
       toast({
-        title: "Update Success",
+        title: 'Update Success',
         action: <ToastAction altText="undo">Undo</ToastAction>,
       });
       router.push(`/profile/${user?._id}`);
     },
     onError: (error: any) => {
-      console.error("Error updating user:", error);
+      console.error('Error updating user:', error);
       const errMessage =
-        error?.response?.data?.error || "Server error, please try again later";
+        error?.response?.data?.error || 'Server error, please try again later';
       setErrorMessage(errMessage);
     },
   });
   function onSubmit(values: ProfileFormValues) {
     if (file) {
-      const validImageTypes = ["image/png", "image/jpeg", "image/jpg"];
-      if (!validImageTypes.includes(file.type)) {
-        setErrorMessage("Please upload a valid image (PNG, JPEG, JPG).");
+      const validImageTypes = /^(image\/(png|jpeg|jpg|gif|bmp|webp|jfif))$/;
+      if (!validImageTypes.test(file.type)) {
+        setErrorMessage(
+          'Please upload a valid image (PNG, JPEG, JPG, GIF, BMP, WebP).',
+        );
         return;
       }
     }
@@ -127,12 +129,12 @@ export default function ProfileForm() {
   const handleImage = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const selectedFile = e.target.files ? e.target.files[0] : null;
-    if (selectedFile?.type.includes("image")) {
+    if (selectedFile?.type.includes('image')) {
       setFile(selectedFile);
       const objectUrl = URL.createObjectURL(selectedFile);
       setImagePreview(objectUrl); // Tạo URL tạm thời để hiển thị ảnh
     } else {
-      setErrorMessage("Please select a valid image file.");
+      setErrorMessage('Please select a valid image file.');
     }
   };
 

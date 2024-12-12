@@ -19,10 +19,10 @@ export const getAllUsers = async (): Promise<User[]> => {
 };
 
 
-export const getAllReports = async ({page}): Promise<Report[]> => {
+export const getAllReports = async ({query} : { query: string}): Promise<Report[]> => {
     try {
         const response = await axiosClient.get(`/report/reports/`, {
-            params: { page },
+            params: { query },
             });
             
         // Check for any error in the response

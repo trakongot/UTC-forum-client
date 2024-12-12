@@ -1,5 +1,5 @@
-import axiosClient from "@/lib/userApi";
-import { User } from "@/types/userType";
+import axiosClient from '@/lib/userApi';
+import { User } from '@/types/userType';
 
 export const signinUser = async ({
   email,
@@ -8,7 +8,7 @@ export const signinUser = async ({
   email: string;
   password: string;
 }): Promise<User> => {
-  const response = await axiosClient.post("/users/signin", {
+  const response = await axiosClient.post('/users/signin', {
     email,
     password,
   });
@@ -24,7 +24,7 @@ export const signupUser = async ({
   email: string;
   password: string;
 }): Promise<User> => {
-  const response = await axiosClient.post("/users/signup", {
+  const response = await axiosClient.post('/users/signup', {
     email,
     password,
   });
@@ -37,7 +37,7 @@ export const logoutUser = async (): Promise<{
   success: boolean;
   message: string;
 }> => {
-  const response = await axiosClient.post("/users/logout");
+  const response = await axiosClient.post('/users/logout');
   if (response.data.error) {
     throw new Error(response.data.error);
   }
@@ -45,4 +45,24 @@ export const logoutUser = async (): Promise<{
     success: boolean;
     message: string;
   };
+};
+
+export const forgotPassword = async (email: string): Promise<void> => {
+  const response = await axiosClient.post('/users/forgot-password', { email });
+  if (response.data.error) throw new Error(response.data.error);
+};
+export const resetPassword = async ({
+  token,
+  newPassword,
+}: {
+  token: string;
+  newPassword: string;
+}): Promise<void> => {
+  const response = await axiosClient.post('/users/reset-password', {
+    token,
+    newPassword,
+  });
+  if (response.data.error) {
+    throw new Error(response.data.error);
+  }
 };

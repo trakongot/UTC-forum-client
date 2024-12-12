@@ -1,5 +1,18 @@
-"use client";
-import Link from "next/link";
+'use client';
+import { logoutUser } from '@/apis/auth';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import useTriggerStore from '@/store/useTriggerStore';
+import useUserStore from '@/store/useUserStore';
 import {
   Flag,
   LinkIcon,
@@ -10,11 +23,11 @@ import {
   Settings,
   UserMinus,
   VolumeX,
-} from "lucide-react";
-import useTriggerStore from "@/store/useTriggerStore";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import useUserStore from "@/store/useUserStore";
-import { usePathname, useRouter } from "next/navigation";
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useMutation } from 'react-query';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
   Menubar,
   MenubarContent,
@@ -23,32 +36,30 @@ import {
   MenubarSeparator,
   MenubarShortcut,
   MenubarTrigger,
-} from "../ui/menubar";
-import { useMutation } from "react-query";
-import { logoutUser } from "@/apis/auth";
-import { toast } from "../ui/use-toast";
+} from '../ui/menubar';
+import { toast } from '../ui/use-toast';
 function Topbar() {
   const { LeftSidebarOpened } = useTriggerStore();
   const avatarUrl = useUserStore((state) => state.user?.profilePic);
   const logout = useUserStore((state) => state?.logout);
   const pathname = usePathname();
-  const isProfilePage = pathname.includes("/profile");
+  const isProfilePage = pathname.includes('/profile');
   const router = useRouter();
   const { mutate: mutatelogout } = useMutation({
     mutationFn: logoutUser,
     onSuccess: (data) => {
       if (data.success) {
-        logout()
-        router.push("./sign-in");
+        logout();
+        router.push('./sign-in');
         toast({
-          title: "Logout Success",
+          title: 'Logout Success',
         });
       }
     },
     onError: (error: any) => {
-      console.error("Error updating user:", error);
+      console.error('Error updating user:', error);
       const errMessage =
-        error?.response?.data?.error || "Server error, please try again later";
+        error?.response?.data?.error || 'Server error, please try again later';
       errMessage(errMessage); // Set error message from API
     },
   });
@@ -64,11 +75,36 @@ function Topbar() {
       </Link>
 
       <div className="flex items-center gap-1">
-        <div className="block md:hidden">
-          <div onClick={() => mutatelogout()} className="flex cursor-pointer">
-            <LogOutIcon className="size-6" />
-          </div>
-        </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <div className="block md:hidden">
+              <div
+                onClick={() => mutatelogout()}
+                className="flex cursor-pointer"
+              >
+                <LogOutIcon className="size-6" />
+              </div>
+            </div>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Bạn có chắc chắn muốn đăng xuất không?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Bạn sẽ bị đăng xuất khỏi tài khoản của mình. Mọi tiến trình chưa
+                lưu có thể sẽ bị mất.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Hủy</AlertDialogCancel>
+              <AlertDialogAction onClick={() => mutatelogout()}>
+                Đăng xuất
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {!isProfilePage && (
           <Menubar>
             <MenubarMenu>
@@ -78,7 +114,7 @@ function Topbar() {
                   <AvatarFallback>
                     <AvatarImage
                       src={
-                        "https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png"
+                        'https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png'
                       }
                     />
                   </AvatarFallback>
@@ -110,7 +146,7 @@ function Topbar() {
 
                 <MenubarSeparator />
 
-                <Link href={"./settings/profile"}>
+                <Link href={'./settings/profile'}>
                   <MenubarItem className="flex cursor-default items-center justify-between py-2">
                     Settings
                     <Settings className="ml-2 size-4  cursor-pointer" />

@@ -1,24 +1,24 @@
-"use client";
-import { v4 as uuidv4 } from "uuid";
-import Image from "next/image";
-import ThreadsTab from "@/components/shared/ThreadsTab";
-import ProfileHeader from "@/components/shared/ProfileHeader";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import useUserStore from "@/store/useUserStore";
-import { useRouter } from "next/navigation";
-import { useQuery } from "react-query";
-import { getUserById } from "@/apis/user";
-import { getThreadsByUser } from "@/apis/threads";
-import ThreadCard from "@/components/cards/ThreadCard";
-import ThreadCardSekeleton from "@/components/cards/ThreadCardSekeleton";
-import { useEffect, useRef, useState } from "react";
-import { throttle } from "@/lib/utils";
+'use client';
+import { getThreadsByUser } from '@/apis/threads';
+import { getUserById } from '@/apis/user';
+import ThreadCard from '@/components/cards/ThreadCard';
+import ThreadCardSekeleton from '@/components/cards/ThreadCardSekeleton';
+import ProfileHeader from '@/components/shared/ProfileHeader';
+import ThreadsTab from '@/components/shared/ThreadsTab';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { throttle } from '@/lib/utils';
+import useUserStore from '@/store/useUserStore';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useQuery } from 'react-query';
+import { v4 as uuidv4 } from 'uuid';
 // import { toast } from "@/components/ui/use-toast";
 
 const profileTabs = [
-  { value: "threads", label: "Threads", icon: "/assets/reply.svg" },
-  { value: "replies", label: "Replies", icon: "/assets/members.svg" },
-  { value: "repost", label: "Repost", icon: "/assets/tag.svg" },
+  { value: 'threads', label: 'Threads', icon: '/assets/reply.svg' },
+  { value: 'replies', label: 'Replies', icon: '/assets/members.svg' },
+  { value: 'repost', label: 'Repost', icon: '/assets/tag.svg' },
 ];
 
 export default function Page({ params }: Readonly<{ params: { id: string } }>) {
@@ -28,28 +28,28 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
   //   toast({title: 'vui lòng đăng nhập'})
   //   router.push("/sign-in");
   // }
-
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 3;
   const profileId = params.id;
+  const isOwnerProfile = currentUser?._id === profileId;
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [threads, setThreads] = useState<any[]>([]);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   const { data: userData } = useQuery({
-    queryKey: ["user", profileId],
+    queryKey: ['user', profileId],
     queryFn: () => getUserById({ id: profileId }),
     onError: (error) => {
-      console.error("Sever bảo trì vui lòng thử lại sau", error);
+      console.error('Sever bảo trì vui lòng thử lại sau', error);
     },
     enabled: !!profileId,
   });
 
   const { data: threadsData, isLoading: isLoadingThreadsData } = useQuery({
-    queryKey: ["threadsById", profileId, pageNumber],
+    queryKey: ['threadsById', profileId, pageNumber],
     queryFn: () => getThreadsByUser({ id: profileId, pageNumber, pageSize }),
     onError: (error) => {
-      console.error("Sever bảo trì vui lòng thử lại sau", error);
+      console.error('Sever bảo trì vui lòng thử lại sau', error);
     },
     enabled: !!profileId,
   });
@@ -70,22 +70,22 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
   }, [threadsData]);
   useEffect(() => {
     const divRef = loaderRef.current;
-    divRef?.addEventListener("scroll", handleScroll);
+    divRef?.addEventListener('scroll', handleScroll);
 
     return () => {
-      divRef?.removeEventListener("scroll", handleScroll);
+      divRef?.removeEventListener('scroll', handleScroll);
     };
   }, [handleScroll]);
   if (currentUser?.onboarded === false) {
-    router.push("/onboarding");
+    router.push('/onboarding');
   }
   if (!userData) return <>loading...</>;
   return (
     <section>
-      <ProfileHeader data={userData} />
+      <ProfileHeader className="mt-0" data={userData} />
       <div
         ref={loaderRef}
-        className="no-scrollbar mt-9 max-h-[80vh] overflow-auto"
+        className="no-scrollbar mt-9 max-h-[80vh] overflow-auto pb-40"
       >
         <Tabs defaultValue="threads" className="w-full">
           <TabsList className="flex min-h-[50px] flex-1 items-center justify-evenly gap-3 bg-light-1 text-primary shadow-md data-[state=active]:shadow-none dark:bg-dark-4 dark:text-light-2 dark:data-[state=active]:bg-[#0e0e12]">
@@ -106,7 +106,7 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
                   {tab.label}
                 </p>
 
-                {tab.label === "Threads" && (
+                {tab.label === 'Threads' && (
                   <p className="ml-2 rounded-sm px-2 py-1 dark:bg-light-4 dark:text-light-2">
                     {threadsData?.threads.length ?? 0}
                   </p>
@@ -121,8 +121,8 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
               className="w-full dark:text-light-1"
             >
               <ThreadsTab
-                currentUserId={userData?._id ?? ""}
-                accountId={userData?._id ?? ""}
+                currentUserId={userData?._id ?? ''}
+                accountId={userData?._id ?? ''}
                 accountType="User"
               />
             </TabsContent>
@@ -134,7 +134,11 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
               .fill(0)
               .map(() => <ThreadCardSekeleton key={uuidv4()} />)
           ) : threads?.length === 0 ? (
-            <p className="no-result">Rất tiếc, chúng tôi không tìm thấy nội dung bạn đang tìm kiếm. Có thể nội dung này đã bị xóa hoặc không tồn tại.</p>
+            <p className="no-result">
+              {isOwnerProfile
+                ? ' Hiện tại, chưa có bài viết nào. Hãy đăng nội dung đầu tiên của bạn!'
+                : 'Chưa có nội dung nào được đăng tải.'}
+            </p>
           ) : (
             threads?.map((thread) => (
               <ThreadCard

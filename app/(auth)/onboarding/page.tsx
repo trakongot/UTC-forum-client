@@ -1,9 +1,9 @@
-import { Metadata } from "next";
-import { OnboardingForm } from "../_components/onboarding-form";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Metadata } from 'next';
+import { OnboardingForm } from '../_components/onboarding-form';
 
 export const metadata: Metadata = {
-  title: "Auth",
+  title: 'Auth',
 };
 
 export default function Page() {
@@ -14,7 +14,7 @@ export default function Page() {
         <p className=" mt-3 text-dark-3">
           Complete your profile now, to use Threds.
         </p>
-        <section className="mt-9">
+        <section className="mt-9 pb-40">
           <OnboardingForm />
         </section>
       </main>

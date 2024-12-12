@@ -1,13 +1,13 @@
-"use client";
-import { v4 as uuidv4 } from "uuid";
-import { useRouter } from "next/navigation";
-import ThreadCard from "@/components/cards/ThreadCard";
-import { getThreads } from "@/apis/threads";
-import { useQuery } from "react-query";
-import useUserStore from "@/store/useUserStore";
-import { useEffect, useState, useRef } from "react";
-import ThreadCardSekeleton from "@/components/cards/ThreadCardSekeleton";
-import { throttle } from "@/lib/utils";
+'use client';
+import { getThreads } from '@/apis/threads';
+import ThreadCard from '@/components/cards/ThreadCard';
+import ThreadCardSekeleton from '@/components/cards/ThreadCardSekeleton';
+import { throttle } from '@/lib/utils';
+import useUserStore from '@/store/useUserStore';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useQuery } from 'react-query';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function Home({
   searchParams,
@@ -25,13 +25,13 @@ export default function Home({
   // Redirect to onboarding if user has not completed it
   useEffect(() => {
     if (user?.onboarded === false) {
-      router.push("/onboarding");
+      router.push('/onboarding');
     }
   }, [user, router]);
 
   // Fetch threads data using React Query
   const { isLoading, isFetching } = useQuery(
-    ["threads", pageNumber],
+    ['threads', pageNumber],
     () => getThreads({ pageNumber, pageSize }),
     {
       keepPreviousData: true,
@@ -39,9 +39,9 @@ export default function Home({
         setThreads((prevThreads) => [...prevThreads, ...newData.threads]);
       },
       onError: (err) => {
-        console.error("Error fetching threads:", err);
+        console.error('Error fetching threads:', err);
       },
-    }
+    },
   );
 
   // Infinite scroll handler with throttle
@@ -56,21 +56,21 @@ export default function Home({
     }, 300); // Adjust delay as needed
 
     const divRef = loaderRef.current;
-    divRef?.addEventListener("scroll", handleScroll);
+    divRef?.addEventListener('scroll', handleScroll);
 
     return () => {
-      divRef?.removeEventListener("scroll", handleScroll);
+      divRef?.removeEventListener('scroll', handleScroll);
     };
   }, [isFetching]);
 
   return (
     <>
       <h1 className="head-text text-left text-2xl font-bold text-dark-1 dark:text-light-1">
-        Được Quan Tâm Nhiều      
+        Được Quan Tâm Nhiều
       </h1>
       <section
         ref={loaderRef}
-        className="no-scrollbar mt-9 flex max-h-[80vh] flex-col gap-10 overflow-auto"
+        className="no-scrollbar mt-9 flex max-h-[80vh] flex-col gap-10 overflow-auto pb-40"
       >
         {isLoading && threads.length === 0
           ? Array(5)

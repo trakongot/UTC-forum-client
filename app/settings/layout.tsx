@@ -1,26 +1,24 @@
-"use client";
+'use client';
 
-import type { Metadata } from "next";
-import Bottombar from "@/components/shared/Bottombar";
-import { Layout } from "@/components/custom/layout";
-import { Input } from "@/components/ui/input";
-import ThemeSwitch from "@/components/theme-switch";
-import { UserNav } from "@/components/user-nav";
-import { Separator } from "@/components/ui/separator";
-import SidebarNav from "./components/sidebar-nav";
-import LeftSidebar from "@/components/shared/LeftSidebar";
+import { Layout } from '@/components/custom/layout';
+import Bottombar from '@/components/shared/Bottombar';
+import LeftSidebar from '@/components/shared/LeftSidebar';
+import ThemeSwitch from '@/components/theme-switch';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Toaster } from '@/components/ui/toaster';
+import { UserNav } from '@/components/user-nav';
 import {
-  IconBrowserCheck,
-  IconExclamationCircle,
   IconNotification,
   IconPalette,
-  IconTool,
+  IconReport,
   IconUser,
-} from "@tabler/icons-react";
-import { Toaster } from "@/components/ui/toaster";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@tabler/icons-react';
+import type { Metadata } from 'next';
+import SidebarNav from './components/sidebar-nav';
 export const metadata: Metadata = {
-  title: "Threads",
+  title: 'Threads',
 };
 
 export default function RootLayout({
@@ -51,10 +49,11 @@ export default function RootLayout({
               <Layout.Body className="flex flex-col">
                 <div className="space-y-0.5">
                   <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-                    Settings
+                    Cài đặt và quyền riêng tư
                   </h1>
                   <p className="text-muted-foreground">
-                    Manage your account settings and set e-mail preferences.
+                    Quản lý các cài đặt tài khoản của bạn và tùy chỉnh các sở
+                    thích về email để nhận thông tin phù hợp nhất với bạn.
                   </p>
                 </div>
                 <Separator className="my-4 lg:my-6" />
@@ -79,33 +78,33 @@ export default function RootLayout({
 
 const sidebarNavItems = [
   {
-    title: "Profile",
+    title: 'Profile',
     icon: <IconUser size={18} />,
-    href: "/profile/edit",
+    href: '/profile/edit',
   },
   // {
   //   title: "Account",
   //   icon: <IconTool size={18} />,
   //   href: "/settings/account",
   // },
-  // {
-  //   title: "Appearance",
-  //   icon: <IconPalette size={18} />,
-  //   href: "/settings/appearance",
-  // },
-  // {
-  //   title: "Notifications",
-  //   icon: <IconNotification size={18} />,
-  //   href: "/settings/notifications",
-  // },
-  // {
-  //   title: "Display",
-  //   icon: <IconBrowserCheck size={18} />,
-  //   href: "/settings/display",
-  // },
-  // {
-  //   title: "Error Example",
-  //   icon: <IconExclamationCircle size={18} />,
-  //   href: "/settings/error-example",
-  // },
+  {
+    title: 'Hỏi đáp',
+    icon: <IconPalette size={18} />,
+    href: '/settings/faq',
+  },
+  {
+    title: 'Chính sách',
+    icon: <IconPalette size={18} />,
+    href: '/settings/policy',
+  },
+  {
+    title: 'Liên hệ',
+    icon: <IconNotification size={18} />,
+    href: '/settings/contact-us',
+  },
+  {
+    title: 'Báo cáo',
+    icon: <IconReport size={18} />,
+    href: '/settings/report',
+  },
 ];

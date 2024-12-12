@@ -1,17 +1,21 @@
-import Link from "next/link";
-import React, { useState } from "react";
-import Carousel from "../custom/carousel";
-import Carousel2 from "../custom/carousel2";
+import { deleteThread, likeOrUnlikeThread } from '@/apis/threads';
 import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarTrigger,
-} from "../ui/menubar";
-import { HeartFilledIcon, HeartIcon, Share1Icon } from "@radix-ui/react-icons";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { copyLink, formatDateString } from '@/lib/utils';
+import useTempStore from '@/store/useTempStore';
+import useTriggerStore from '@/store/useTriggerStore';
+import useUserStore from '@/store/useUserStore';
+import { Thread } from '@/types/threadType';
+import { HeartFilledIcon, HeartIcon, Share1Icon } from '@radix-ui/react-icons';
 import {
   BellMinusIcon,
   BellOffIcon,
@@ -22,19 +26,26 @@ import {
   MessageCircleIcon,
   Repeat2,
   Trash2Icon,
-} from "lucide-react";
-import { Thread } from "@/types/threadType";
-import { copyLink, formatDateString } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import useTempStore from "@/store/useTempStore";
-import useTriggerStore from "@/store/useTriggerStore";
-import useUserStore from "@/store/useUserStore";
-import { DialogContent } from "../ui/dialog";
-import { Dialog, DialogTrigger } from "../custom/dialog";
-import { Button } from "../custom/button";
-import { usePathname, useRouter } from "next/navigation";
-import { useMutation } from "react-query";
-import { likeOrUnlikeThread } from "@/apis/threads";
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useMutation, useQueryClient } from 'react-query';
+import { Button } from '../custom/button';
+import Carousel from '../custom/carousel';
+import Carousel2 from '../custom/carousel2';
+import { Dialog, DialogContent, DialogTrigger } from '../custom/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarShortcut,
+  MenubarTrigger,
+} from '../ui/menubar';
+import { toast } from '../ui/use-toast';
 type Props = {
   data: Thread;
   displayType?: 1 | 2;
@@ -54,7 +65,8 @@ export default function ThreadCard({
   const { user } = useUserStore();
   const isOwnerThread = user?._id === data.postedBy._id;
   const pathname = usePathname();
-  const isProfilePage = pathname.includes("./profile");
+  const isProfilePage = pathname.includes('./profile');
+  const queryClient = useQueryClient();
 
   // API react query
   const { mutate: mutatelike } = useMutation({
@@ -63,14 +75,33 @@ export default function ThreadCard({
       setLikeCount(data.likeCount);
     },
     onError: (error: any) => {
-      console.error("Error liking thread:", error);
+      console.error('Error liking thread:', error);
       // const errMessage =
       //   error?.response?.data?.error || "Server error, please try again later";
       // alert(errMessage);
     },
   });
+  const { mutate: mutatedelete } = useMutation({
+    mutationFn: () => deleteThread({ id: data._id }),
+    onSuccess: () => {
+      // queryClient.invalidateQueries('threads');
+      queryClient.invalidateQueries(['threads', 0], {
+        refetchActive: true,
+        refetchInactive: true,
+      });
 
-  const handlerLike = () => {
+      toast({
+        title: 'Delete Success',
+      });
+    },
+    onError: (error: any) => {
+      console.error('Error delete thread:', error);
+    },
+  });
+  const handleDelete = () => {
+    mutatedelete();
+  };
+  const handleLike = () => {
     if (isLiked) setLikeCount((prevlikeCount) => prevlikeCount - 1);
     else setLikeCount((prevlikeCount) => prevlikeCount + 1);
     setIsLiked((prevIsLiked) => !prevIsLiked);
@@ -78,14 +109,14 @@ export default function ThreadCard({
   };
 
   const handleOpenPreviewProfile = () => {
-    toggleTrigger("isPreviewProfileCardOpened");
+    toggleTrigger('isPreviewProfileCardOpened');
   };
   const handleComment = () => {
     setCurrentThread(data);
-    toggleTrigger("isCreateThreadCardOpened");
+    toggleTrigger('isCreateThreadCardOpened');
   };
   const handleReport = () => {
-    toggleTrigger("isReportCardOpened");
+    toggleTrigger('isReportCardOpened');
   };
   const quoteThread = `<blockquote class="text-post-media" data-text-post-permalink="${threadUrl}" id="ig-tp-DCYbxucSdAf" style="background:#FFF; border-width: 1px; border-style: solid; border-color: #00000026; border-radius: 16px; max-width:540px; margin: 1px; min-width:270px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);">
       <a href="${threadUrl}" style="background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif;" target="_blank">
@@ -146,7 +177,7 @@ export default function ThreadCard({
                           sizes=""
                           src={
                             data.postedBy.profilePic ??
-                            "https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png"
+                            'https://res.cloudinary.com/muckhotieu/image/upload/v1731805369/l60Hf_ztxub0.png'
                           }
                           alt="avatar"
                         />
@@ -167,21 +198,36 @@ export default function ThreadCard({
 
             <div className="flex w-full flex-col">
               <div className="flex w-full items-center justify-between">
-                <Link
-                  href={
-                    isProfilePage
-                      ? `/thread/${data._id}`
-                      : `/profile/${data.postedBy._id}`
-                  }
-                  className="flex w-fit items-center"
-                >
-                  <h4 className="cursor-pointer text-2xl font-semibold dark:text-light-1">
-                    {data?.postedBy?.name}
-                  </h4>
-                  <span className="ml-3 text-xs text-dark-4">
-                    {formatDateString(data?.createdAt)}
-                  </span>
-                </Link>
+                {isProfilePage || isOwnerThread ? (
+                  <Link
+                    href={
+                      isProfilePage
+                        ? `/thread/${data._id}`
+                        : `/profile/${data.postedBy._id}`
+                    }
+                    className="flex w-fit items-center"
+                  >
+                    <h4 className="cursor-pointer text-2xl font-semibold dark:text-light-1">
+                      {data?.postedBy?.name}
+                    </h4>
+                    <span className="ml-3 text-xs text-dark-4">
+                      {formatDateString(data?.createdAt)}
+                    </span>
+                  </Link>
+                ) : (
+                  <Button
+                    onClick={handleOpenPreviewProfile}
+                    className="m-0 flex w-fit items-center border-none bg-transparent p-0 text-inherit shadow-none outline-none hover:bg-transparent focus:outline-none active:bg-transparent"
+                  >
+                    <h4 className="cursor-pointer text-2xl font-semibold dark:text-light-1">
+                      {data?.postedBy?.name}
+                    </h4>
+                    <span className="ml-3 text-xs text-dark-4">
+                      {formatDateString(data?.createdAt)}
+                    </span>
+                  </Button>
+                )}
+
                 <Menubar>
                   <MenubarMenu>
                     <MenubarTrigger className="flex items-center rounded-full p-2 transition-all duration-150 hover:bg-[#e1e1e1] active:scale-95 data-[state=open]:bg-[#e1e1e1]">
@@ -193,23 +239,34 @@ export default function ThreadCard({
                       </MenubarItem>
                       {isOwnerThread && (
                         <>
-                          <MenubarItem className="flex cursor-default items-center justify-between py-2">
-                            Delete
-                            <Trash2Icon className="size-4 cursor-pointer " />
-                          </MenubarItem>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <MenubarItem className="!hover:text-red-800 flex cursor-default items-center justify-between py-2 text-red-600">
+                                Delete
+                                <Trash2Icon className="size-4 cursor-pointer " />
+                              </MenubarItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you absolutely sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently delete your account and remove
+                                  your data from our servers.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete}>
+                                  Continue
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+
                           <MenubarSeparator />
-                          {/* <MenubarItem className="flex cursor-default items-center justify-between py-2">
-                          Mute
-                          <BellMinusIcon className="size-4 cursor-pointer " />
-                        </MenubarItem>
-                        <MenubarItem className="flex cursor-default items-center justify-between py-2">
-                          Block
-                          <ListXIcon className="size-4 cursor-pointer" />
-                        </MenubarItem>
-                        <MenubarItem className="flex cursor-default items-center justify-between py-2">
-                          Report
-                          <FlagTriangleRightIcon className="size-4 cursor-pointer" />
-                        </MenubarItem> */}
                         </>
                       )}
                       {!isOwnerThread && (
@@ -238,7 +295,7 @@ export default function ThreadCard({
                       )}
                       <MenubarSeparator />
                       <MenubarItem
-                        onClick={() => copyLink(threadUrl ?? "")}
+                        onClick={() => copyLink(threadUrl ?? '')}
                         className="flex cursor-default items-center justify-between py-2"
                       >
                         Copy link
@@ -262,7 +319,7 @@ export default function ThreadCard({
               <div className={`mt-5 flex flex-col gap-3`}>
                 <div className="flex gap-3.5">
                   <button
-                    onClick={() => handlerLike()}
+                    onClick={() => handleLike()}
                     className="flex items-center rounded-full px-2 py-1 transition-all duration-150 hover:bg-[#e1e1e1] active:scale-95"
                   >
                     {isLiked ? (
@@ -297,7 +354,7 @@ export default function ThreadCard({
                       </MenubarTrigger>
                       <MenubarContent align="end">
                         <MenubarItem
-                          onClick={() => copyLink(threadUrl ?? "")}
+                          onClick={() => copyLink(threadUrl ?? '')}
                           className="cursor-default py-2"
                         >
                           Copy Link
@@ -336,12 +393,17 @@ function UserPreviewCard({ data }: { data: UserPreviewCardProps }) {
   const route = useRouter();
 
   const handleOpenChange = () => {
-    toggleTrigger("isPreviewProfileCardOpened");
+    toggleTrigger('isPreviewProfileCardOpened');
   };
   const [isFollowing, setIsFollowing] = useState(data.isFollowed);
+  const [followerCount, setFollowerCount] = useState(data.followerCount ?? 0);
 
   const handleFollowToggle = () => {
     setIsFollowing((prev) => !prev);
+
+    setFollowerCount((prevCount) =>
+      isFollowing ? prevCount - 1 : prevCount + 1,
+    );
   };
 
   return (
@@ -354,9 +416,9 @@ function UserPreviewCard({ data }: { data: UserPreviewCardProps }) {
         <DialogContent>
           <div className="flex flex-col items-center space-y-4">
             <Button
-              className="border-none bg-transparent shadow-none text-black hover:border-none hover:bg-transparent focus:outline-none active:bg-transparent"
+              className="border-none bg-transparent text-black shadow-none hover:border-none hover:bg-transparent focus:outline-none active:bg-transparent"
               onClick={() => {
-                toggleTrigger("isPreviewProfileCardOpened");
+                toggleTrigger('isPreviewProfileCardOpened');
                 route.push(`./profile/${data._id}`);
               }}
             >
@@ -381,13 +443,13 @@ function UserPreviewCard({ data }: { data: UserPreviewCardProps }) {
             <div className="text-sm text-gray-500">{data.bio}</div>
 
             <div className="text-sm text-gray-700">
-              {data.followerCount ?? 0} Người theo dõi
+              {followerCount} Người theo dõi
             </div>
             <Button
               onClick={handleFollowToggle}
-              className={`mt-4 ${isFollowing ? "bg-gray-500" : "bg-black"} text-white`}
+              className={`mt-4 ${isFollowing ? 'bg-gray-500' : 'bg-black'} text-white`}
             >
-              {isFollowing ? "Unfollow" : "Follow"}
+              {isFollowing ? 'Unfollow' : 'Follow'}
             </Button>
           </div>
         </DialogContent>
